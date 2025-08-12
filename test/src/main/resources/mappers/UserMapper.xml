@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.user.model.mapper.UserMapper">
+    <insert id="userJoin" parameterType="com.user.model.dto.UserDto" >
+      INSERT INTO users
+           ( user_name
+           , user_email
+           , user_password
+           , user_phone_num
+           , user_zonecode
+           , user_road_address
+           , user_detail_address
+           , user_refer_address
+           )
+      VALUES
+           ( #{user_name}
+           , #{user_email}
+           , #{user_password}
+           , #{user_phone_num}
+           , #{user_zonecode}
+           , #{user_road_address}
+           , #{user_detail_address}
+           , #{user_refer_address}
+           )
+    </insert>
+    
+    <select id="userNameCheck" resultType="int" >
+      SELECT COUNT(*) 
+        FROM users
+       WHERE user_name = #{name}
+    </select>
+    
+    <select id="userEmailCheck" resultType="int" >
+      SELECT COUNT(*) 
+        FROM users
+       WHERE user_email = #{email}
+    </select>
+    
+    <select id="userPhoneCheck" resultType="int" >
+      SELECT COUNT(*)
+        FROM users 
+       WHERE user_phone_num = #{phone}
+    </select>
+    
+    <select id="userPassword" resultType="String" >
+      SELECT user_password 
+        FROM users 
+       WHERE user_email = #{email}
+    </select>
+    
+    <select id="userLoginInformation" resultType="com.user.model.dto.UserDto" >
+      SELECT user_id
+           , user_name
+           , user_email
+           , user_phone_num
+           , user_zonecode
+           , user_road_address
+           , user_detail_address
+           , user_refer_address 
+        FROM users 
+       WHERE user_email = #{email}
+    </select>
+    
+</mapper>

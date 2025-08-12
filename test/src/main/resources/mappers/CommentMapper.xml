@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.comment.model.mapper.CommentMapper">
+
+    <select id="commentList" resultType="com.comment.model.dto.CommentListDto">
+            
+			      SELECT c.comment_id
+						     , u.user_id
+						     , u.user_name AS writer_name
+						     , (SELECT pu.user_name 
+						          FROM comments pc
+						             , users pu
+						         WHERE pc.user_id = pu.user_id 
+						           AND pc.comment_id = c.comment_parent_id
+						       ) AS tag_name
+						     , c.comment_content
+						     , c.comment_parent_id
+						     , c.comment_root_id
+						     , c.comment_parent_level
+						     , c.comment_delete_state
+						     , CASE
+						         WHEN c.comment_update_at IS NOT NULL
+						           THEN TO_CHAR(c.comment_update_at, 'YYYY-MM-DD HH24:MI:SS') || ' (수정)'
+						         ELSE TO_CHAR(c.comment_create_at, 'YYYY-MM-DD HH24:MI:SS')
+						       END AS comment_display_date
+						  FROM comments c
+        INNER JOIN users u
+                ON c.user_id = u.user_id
+             WHERE c.board_id = #{ board_id }
+        START WITH c.comment_parent_id = 0
+  CONNECT BY PRIOR c.comment_id = c.comment_parent_id
+ ORDER SIBLINGS BY c.comment_parent_level ASC
+			      
+    </select>
+    
+    <insert id="commentWrite" parameterType="com.comment.model.dto.CommentWriteDto">
+      
+      INSERT INTO comments
+                ( board_id
+                , user_id
+                , comment_content
+                , comment_root_id
+                , comment_parent_id
+                , comment_parent_level
+                )
+           VALUES 
+                ( #{ board_id }
+                , #{ user_id }
+                , #{ comment_content }
+                , #{ comment_root_id }
+                , #{ comment_parent_id }
+                , #{ comment_parent_level }
+                )
+            
+    </insert>
+    
+    <update id="commentUpdate" parameterType="com.comment.model.dto.CommentUpdateDto">
+      
+      UPDATE comments
+         SET comment_content = #{ comment_content }
+           , comment_update_at = SYSDATE
+       WHERE comment_id = #{ comment_id }
+      
+    </update>
+    
+    <update id="commentDelete" parameterType="int">
+    
+      UPDATE comments
+         SET comment_delete_state = 1
+       WHERE comment_id = #{ comment_id }
+    
+    </update>
+    
+</mapper>

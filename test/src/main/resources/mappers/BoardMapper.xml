@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.board.model.mapper.BoardMapper">
+
+    <select id="boardList" resultType="com.board.model.dto.BoardListDto">
+      SELECT u.user_name
+           , b.board_id
+           , b.board_title
+           , TO_CHAR(
+               CASE
+	               WHEN b.board_update_at IS NOT NULL
+	                 THEN b.board_update_at
+	               ELSE b.board_create_at
+	             END
+	           , 'YYYY-MM-DD'
+             ) AS board_display_date
+        FROM boards b
+  INNER JOIN users u
+          ON b.user_id = u.user_id
+       WHERE b.board_delete = 0
+    ORDER BY b.board_id DESC
+    </select>
+    
+    <select id="boardDetail" resultType="com.board.model.dto.BoardDetailDto" >
+      SELECT u.user_id
+           , b.board_title
+           , b.board_content
+           , b.board_delete
+        FROM boards b
+  INNER JOIN users u
+          ON b.user_id = u.user_id
+       WHERE board_id = #{ board_id }
+    </select>
+    
+    <update id="boardDelete" parameterType="int">
+      UPDATE boards
+         SET board_delete = 1
+       WHERE board_id = #{ board_id }
+    </update>
+    
+    <insert id="boardWrite"
+            parameterType="com.board.model.dto.BoardWriteDto"
+    >
+	    
+	    <selectKey resultType="int" keyProperty="board_id" order="AFTER">
+	      SELECT board_seq.CURRVAL FROM dual
+	    </selectKey>
+	    
+      INSERT INTO boards
+           ( board_id
+           , board_title
+           , board_content
+           , user_id
+           )    
+      VALUES 
+           ( board_seq.NEXTVAL
+           , #{ board_title }
+           , #{ board_content }
+           , #{ user_id } 
+           )
+
+    </insert>
+    
+    <update id="boardUpdate"
+            parameterType="com.board.model.dto.BoardUpdateDto"
+    >
+    
+      UPDATE boards
+         SET board_title = #{ board_title }
+           , board_content = #{ board_content }
+           , board_update_at = SYSDATE
+       WHERE board_id = #{ board_id }
+    
+    </update>
+    
+</mapper>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.file.model.mapper.FileMapper">
+    
+    <insert id="fileListPost" parameterType="com.file.model.dto.FileUploadDto">
+      
+      INSERT INTO files
+           ( board_id 
+           , file_name
+           )
+      VALUES
+           ( #{ board_id }
+           , #{ file_name }
+           )
+      
+    </insert>
+    
+    <select id="findById" resultType="String" >
+    
+      SELECT file_name
+        FROM files
+       WHERE board_id = #{ board_id }
+    
+    </select>
+    
+    <delete id="fileListDelete">
+    
+      DELETE FROM files
+       WHERE board_id = #{ board_id }
+      
+    </delete>
+    
+</mapper>
