@@ -50,10 +50,17 @@ public class CommentController {
 		// 로그인된 아이디 번호 넣기
 		commentWriteDto.setUser_id( user_id );
 
-		boolean result = commentService.commentWrite( commentWriteDto );
+		// 게시판 번호
 		int board_id = commentWriteDto.getBoard_id();
 		
-		resultMap = resultList( result, board_id );
+		// 댓글 등록
+		boolean result = commentService.commentWrite( commentWriteDto );
+		
+		// 댓글 전체 리스트
+		List<CommentListDto> commentList = commentService.commentList( board_id );
+		
+		resultMap.put("commentList", commentList);
+		resultMap.put("result", result);
 		
 		System.out.println("/api/comment/write 종료");
 		
@@ -110,9 +117,9 @@ public class CommentController {
 			List<CommentListDto> commentList = commentService.commentList( board_id );
 			
 			resultMap.put("commentList", commentList);
-			resultMap.put("result", true);
+			resultMap.put("result", result);
 		}else {
-			resultMap.put("result", false);
+			resultMap.put("result", result);
 		}
 		
 		return resultMap;
