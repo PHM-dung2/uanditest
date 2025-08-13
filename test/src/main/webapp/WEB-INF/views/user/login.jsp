@@ -125,7 +125,7 @@
 	  	  
 	  	$.ajax({
 		    type: "post",
-		    url: "/login",
+		    url: "/api/login",
 		    data: formData,
 		    processData: false,
 		    contentType: false,

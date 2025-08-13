@@ -109,7 +109,7 @@ public class UserController extends HttpServlet {
 	}
 	
 	// 로그인
-	@PostMapping("/login")
+	@PostMapping("/api/login")
 	@ResponseBody
 	public boolean userLogin(UserLoginDto userLoginDto, HttpSession session) throws Exception{
 		

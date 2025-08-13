@@ -123,7 +123,7 @@
   
   <script>
   
-  const userDtoExists = ${not empty UserDto ? 'true' : 'false'};
+  const userDtoExists = ${not empty UserDto};
   
   // 게시물 작성 막기
   $("#write_btn").click(function (e) {
