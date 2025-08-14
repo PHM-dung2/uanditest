@@ -3,14 +3,14 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<jsp:include page="../include/head.jsp" />
+<jsp:include page="../common/head.jsp" />
 
 <body id="page-top">
   <!-- Page Wrapper -->
   <div id="wrapper">
     
     <!-- Sidebar -->
-    <jsp:include page="../include/sidebar.jsp" />
+    <jsp:include page="../common/sidebar.jsp" />
 
     <!-- Content Wrapper -->
     <div id="content-wrapper" class="d-flex flex-column">
@@ -18,7 +18,7 @@
       <div id="content">
       
         <!-- Topbar -->
-        <jsp:include page="../include/topbar.jsp" />
+        <jsp:include page="../common/topbar.jsp" />
         
         <!-- Begin Page Content -->
         <div class="container-fluid h-100">
@@ -88,7 +88,7 @@
       <!-- End of Main Content -->
 
       <!-- Footer -->
-      <jsp:include page="../include/footer.jsp" />
+      <jsp:include page="../common/footer.jsp" />
       
     </div>
     <!-- End of Content Wrapper -->
@@ -96,7 +96,7 @@
   <!-- End of Page Wrapper -->
 
   <!-- Logout Modal-->
-  <jsp:include page="../include/logout_modal.jsp" />
+  <jsp:include page="../common/logout_modal.jsp" />
   
   <script>
   

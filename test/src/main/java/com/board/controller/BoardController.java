@@ -24,7 +24,7 @@ import com.comment.service.CommentService;
 import com.file.service.FileService;
 import com.github.pagehelper.PageInfo;
 import com.user.model.dto.UserDto;
-import com.user.service.LoginService;
+import com.user.service.UserService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -35,7 +35,7 @@ public class BoardController{
 	private BoardService boardService;
 	
 	@Autowired
-	private LoginService loginService;
+	private UserService userService;
 	
 	@Autowired
 	private FileService fileService;
@@ -124,7 +124,7 @@ public class BoardController{
 		BoardDetailDto board = boardService.boardDetail(board_id);
 		
 		// 작성자 일치 여부
-		boolean isWriter = loginService.isWriter(session, board.getUser_id());
+		boolean isWriter = userService.isWriter(session, board.getUser_id());
 		
 		// 해당 게시물 파일
 		List<String> fileList = fileService.findById(board_id);

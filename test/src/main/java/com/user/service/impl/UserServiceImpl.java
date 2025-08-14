@@ -1,7 +1,8 @@
 package com.user.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.user.model.dto.UserDto;
@@ -9,17 +10,21 @@ import com.user.model.dto.UserLoginDto;
 import com.user.model.mapper.UserMapper;
 import com.user.service.UserService;
 
+import jakarta.servlet.http.HttpSession;
+
 @Service
 public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private UserMapper userMapper;
 	
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+	
 	@Override
-	public int userJoin(UserDto userDto) {
+	public boolean userJoin(UserDto userDto) {
 		
 		// 비크립트 암호화
-		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 		String hashedPassword = passwordEncoder.encode(userDto.getUser_password());
 		
 		userDto.setUser_password(hashedPassword);
@@ -43,30 +48,34 @@ public class UserServiceImpl implements UserService {
 	}
 	
 	@Override
-	public UserDto userLogin(UserLoginDto userLoginDto) {
+	public UserDto userLoginInformation( String email ) {
 		
-		// 이메일 확인(이메일 불일치)
-		String email = userLoginDto.getUser_email();
+		UserDto userDto = new UserDto();
+		
+		// 이메일 확인
 		int resultEmail = userMapper.userEmailCheck( email );
+		
 		if( resultEmail == 0 ) {
-			return null;
-		// 비크립트 암호 확인(이메일 일치)
+			throw new UsernameNotFoundException("email" + email + " not found");
+		// 비크립트 암호 확인
 		}else {
-			BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-			// 가져온 이메일에 해당하는 비밀번호		
-			String matchPassword = userMapper.userPassword( userLoginDto.getUser_email( ));
-			// 비밀번호 비교
-			boolean resultPassword = passwordEncoder.matches(userLoginDto.getUser_password(), matchPassword);
-			System.out.println("resultPawword : " + resultPassword);
-			
-			if( resultPassword ) {  
-				UserDto userLoginInformation = userMapper.userLoginInformation( email );
-				
-				return userLoginInformation;
-			}
+			userDto = userMapper.userLoginInformation( email );
 		}
 		
-		return null;
+		return userDto;
+	}
+	
+	// 로그인된 id가 작성자인지 확인
+	public boolean isWriter( HttpSession session, int writerId ) {
+		
+		UserDto userDto = (UserDto)session.getAttribute("UserDto");
+		System.out.println("UserDto : " + userDto);
+		int loginUserId = userDto != null ? userDto.getUser_id() : -1;
+		System.out.println("loginUserId : "+ loginUserId);
+		System.out.println("writerId : "+ writerId);
+		
+		return loginUserId == writerId;
+		
 	}
 	
 }

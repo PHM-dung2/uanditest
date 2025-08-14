@@ -8,7 +8,7 @@ import com.user.model.dto.UserDto;
 public interface UserMapper {
 
 	// 회원가입
-	public int userJoin(UserDto userDto);
+	public boolean userJoin(UserDto userDto);
 	
 	// 이름 중복 체크
 	public int userNameCheck(String name);

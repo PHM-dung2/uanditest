@@ -4,15 +4,18 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import com.TestApplication;
-import com.user.config.WebMvcConfig;
 import com.user.model.dto.UserDto;
 import com.user.model.dto.UserLoginDto;
+import com.user.service.LoginService;
 import com.user.service.UserService;
 
 import jakarta.servlet.http.HttpServlet;
@@ -20,15 +23,15 @@ import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class UserController extends HttpServlet {
-
-	@Autowired
-    private WebMvcConfig webMvcConfig;
-
-	@Autowired
-    private TestApplication testApplication;
 	
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private LoginService loginService;
+	
+	@Autowired
+	private AuthenticationManager authenticationManager;
 	
 	@RequestMapping("/login")
 	public String login() throws Exception{
@@ -52,14 +55,10 @@ public class UserController extends HttpServlet {
 		
 		System.out.println("데이터확인 -> " + userDto.getUser_name());
 		
-		int result = userService.userJoin(userDto);
+		boolean result = userService.userJoin(userDto);
 		// insert 성공시 1 이상 , 실패시 0 return
 		
-		if(result > 0 ){
-			resultMap.put("result", true);
-		} else {
-			resultMap.put("result", false);
-		}
+		resultMap.put("result", result);
 		
 		return resultMap;
 	}
@@ -111,25 +110,40 @@ public class UserController extends HttpServlet {
 	// 로그인
 	@PostMapping("/api/login")
 	@ResponseBody
-	public boolean userLogin(UserLoginDto userLoginDto, HttpSession session) throws Exception{
+	public boolean userLogin(UserLoginDto userLoginDto, HttpSession session) {
 		
 		System.out.println("USER LOGIN 진입");
 		
 		System.out.println("이메일 -> " + userLoginDto.getUser_email());
 		System.out.println("비밀번호 -> " + userLoginDto.getUser_password());
 		
+		String email = userLoginDto.getUser_email();
+		
+		// Spring Security 인증 처리
+		try {
+	        Authentication auth = authenticationManager.authenticate(
+	            new UsernamePasswordAuthenticationToken(email, userLoginDto.getUser_password())
+	        );
+	        SecurityContextHolder.getContext().setAuthentication(auth);
+
+	    } catch ( Exception e ) {
+	        throw new RuntimeException("이메일 또는 비밀번호가 일치하지 않습니다.");
+	    }
+		
 		// 로그인 성공시 로그인 정보 가져오기, 실패시 null
-		UserDto result = userService.userLogin(userLoginDto);
+		UserDto result = userService.userLoginInformation( email );
 		
 		if( result != null ) { 
 			session.setAttribute("UserDto", result );
 			session.setMaxInactiveInterval(60*5);
 			
 			System.out.println( "세션 : " + (UserDto)session.getAttribute("UserDto") );
-			return true;
+		}else {
+			throw new RuntimeException("세션에 정보가 없습니다.");
 		}
 		
-		return false;
+		return true;
+		
 	}
 	
 	// 세션의 회원정보 가져오기

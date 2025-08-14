@@ -2,29 +2,25 @@ package com.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.firewall.HttpFirewall;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
+
+import jakarta.servlet.DispatcherType;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private static final String[] PERMIT_URL_ARRAY = {
-		/* static */
-		"/static/**", 
-		"/css/**", 
-		"/scss/**", 
-		"/js/**", 
-		"/img/**",
-		"/vendor/**",
-		"/resources/**",
-		"/api/**",
 		/* 게시판 */
         "/",
-        "/board/detail/**",
+        "/board/detail",
         /* 회원가입 */
         "/join",
         "/login",
@@ -36,6 +32,11 @@ public class SecurityConfig {
 		httpSecurity
 			.csrf(csrf -> csrf.disable())
 			.authorizeHttpRequests( auth -> auth
+					.dispatcherTypeMatchers(
+							DispatcherType.FORWARD,
+							DispatcherType.INCLUDE,
+							DispatcherType.ASYNC
+					).permitAll()
 					.requestMatchers(PERMIT_URL_ARRAY).permitAll()
 					.anyRequest().authenticated()
 			)
@@ -52,6 +53,13 @@ public class SecurityConfig {
 		
 		return new BCryptPasswordEncoder();
 		
+	}
+	
+	@Bean
+	public HttpFirewall allowUrlWithDoubleSlash() {
+	    StrictHttpFirewall firewall = new StrictHttpFirewall();
+	    firewall.setAllowUrlEncodedDoubleSlash(true); // // 허용
+	    return firewall;
 	}
 	
 }

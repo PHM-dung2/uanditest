@@ -3,6 +3,8 @@ package com.user.service;
 import com.user.model.dto.UserDto;
 import com.user.model.dto.UserLoginDto;
 
+import jakarta.servlet.http.HttpSession;
+
 public interface UserService {
 
 	/**
@@ -11,7 +13,7 @@ public interface UserService {
 	* @author 박희만
 	* @since 2025-07-30
 	*/
-	public int userJoin(UserDto userDto);
+	public boolean userJoin(UserDto userDto);
 	
 	/**
 	* 회원가입 이름 중복 체크
@@ -38,11 +40,19 @@ public interface UserService {
 	public boolean userPhoneCheck(String phone);
 	
 	/**
-	* 회원가입
+	* 로그인
 	* 
 	* @author 박희만
 	* @since 2025-08-02
 	*/
-	public UserDto userLogin(UserLoginDto userLoginDto);
+	public UserDto userLoginInformation(String email);
+	
+	/**
+	* 작성자 확인
+	* 
+	* @author 박희만
+	* @since 2025-08-02
+	*/
+	public boolean isWriter( HttpSession session, int writerId );
 	
 }

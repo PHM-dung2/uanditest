@@ -1,25 +1,33 @@
 package com.user.service;
 
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
 
-import com.user.model.dto.UserDto;
+import com.user.model.mapper.UserMapper;
 
-import jakarta.servlet.http.HttpSession;
+@Service
+public class LoginService implements UserDetailsService {
 
-@Component
-public class LoginService {
-
-	// 로그인된 id가 작성자인지 확인
-	public boolean isWriter( HttpSession session, int writerId ) {
+	@Autowired
+	private UserMapper userMapper;
+	
+	@Override
+	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 		
-		UserDto userDto = (UserDto)session.getAttribute("UserDto");
-		System.out.println("UserDto : " + userDto);
-		int loginUserId = userDto != null ? userDto.getUser_id() : -1;
-		System.out.println("loginUserId : "+ loginUserId);
-		System.out.println("writerId : "+ writerId);
+		String password;
 		
-		return loginUserId == writerId;
+		// 가져온 이메일에 해당하는 비밀번호		
+		password = userMapper.userPassword( email );
 		
+		return User.builder()
+				   .username( email )
+				   .password( password )
+				   .roles("USER")
+				   .build();
 	}
 	
 }
