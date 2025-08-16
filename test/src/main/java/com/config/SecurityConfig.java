@@ -3,6 +3,7 @@ package com.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -18,6 +19,16 @@ import jakarta.servlet.DispatcherType;
 public class SecurityConfig {
 
     private static final String[] PERMIT_URL_ARRAY = {
+		/* static */
+		"/resources/**",
+		"/board/**",
+		"/css/**",
+		"/img/**",
+		"/js/**",
+		"/scss/**",
+		"/vendor/**",
+		/* api */
+		"/api/**",
 		/* 게시판 */
         "/",
         "/board/detail",
@@ -41,7 +52,7 @@ public class SecurityConfig {
 					.anyRequest().authenticated()
 			)
 			.formLogin( formLogin -> formLogin
-									 .loginPage("/")
+									 .loginPage("/login")
 									 .permitAll()
 			);
 		
@@ -52,6 +63,13 @@ public class SecurityConfig {
 	public PasswordEncoder passwordEncoder() {
 		
 		return new BCryptPasswordEncoder();
+		
+	}
+	
+	@Bean
+	public AuthenticationManager authenticationManager( AuthenticationConfiguration authenticationConfig ) throws Exception {
+		
+		return authenticationConfig.getAuthenticationManager();
 		
 	}
 	

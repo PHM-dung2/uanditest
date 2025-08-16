@@ -9,9 +9,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry) {
 		registry.addResourceHandler("/resources/**")
-				.addResourceLocations("classpath:/resources/",
-									  "/resources/"
-									 );
+				.addResourceLocations("/resources/");
 	}
 	
 	@Override

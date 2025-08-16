@@ -106,21 +106,22 @@
 		      console.log("response : ", res);
 		       
 		      if( res === true ){ 
-	         alert("로그인되었습니다.");
-	         location.href="/";
-	         return true;
-		      }
-		      else{
-	      	  alert("이메일 혹은 비밀번호가 실패하였습니다.");
+	          alert("로그인되었습니다.");
+	          location.href = "/";
+	          return true;
 		      }
 
 		      return false;
 		      
 	      },
-	     error: function(err) {
-	       alert("서버 오류. 관리자에게 문의해주세요.");
-	       console.log("실패", err);
-	     }
+	      error: function(jqXHR, testStatus, errorThrown){
+	        const responseText = JSON.parse(jqXHR.responseText);
+
+	        if( responseText.RuntimeException != null ){
+	          alert("에러 발생 : " + responseText.RuntimeException);
+	        }
+	          console.log("실패");
+	      }
 	    });
     	  
     });

@@ -18,11 +18,10 @@ import com.user.model.dto.UserLoginDto;
 import com.user.service.LoginService;
 import com.user.service.UserService;
 
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpSession;
 
 @Controller
-public class UserController extends HttpServlet {
+public class UserController {
 	
 	@Autowired
 	private UserService userService;
@@ -112,7 +111,7 @@ public class UserController extends HttpServlet {
 	@ResponseBody
 	public boolean userLogin(UserLoginDto userLoginDto, HttpSession session) {
 		
-		System.out.println("USER LOGIN 진입");
+		System.out.println("/api/login 시작");
 		
 		System.out.println("이메일 -> " + userLoginDto.getUser_email());
 		System.out.println("비밀번호 -> " + userLoginDto.getUser_password());
@@ -142,8 +141,9 @@ public class UserController extends HttpServlet {
 			throw new RuntimeException("세션에 정보가 없습니다.");
 		}
 		
-		return true;
+		System.out.println("/api/login 종료");
 		
+		return true;
 	}
 	
 	// 세션의 회원정보 가져오기

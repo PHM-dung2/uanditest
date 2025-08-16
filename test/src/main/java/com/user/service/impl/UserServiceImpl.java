@@ -6,7 +6,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.user.model.dto.UserDto;
-import com.user.model.dto.UserLoginDto;
 import com.user.model.mapper.UserMapper;
 import com.user.service.UserService;
 
