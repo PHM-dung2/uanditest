@@ -247,7 +247,7 @@
 	   	  if( !confirm("게시물을 삭제하시겠습니까?") ){ return false; }
 	   	  
 	   	  $.ajax({
-	   		  type: "put",
+	   		  type: "post",
 	   		  url: "/api/board/delete",
 	   		  data: { board_id : board_id },
 	   		  dataType: "json",
@@ -480,7 +480,7 @@
     		}
 	   	
 	      $.ajax({
-          type: "put",
+          type: "post",
           url: "/api/comment/update",
           async: true,
           data: data,
@@ -521,7 +521,7 @@
         }
 	      
 	      $.ajax({
-          type: "put",
+          type: "post",
           url: "/api/comment/delete",
           async: true,
           data: data,

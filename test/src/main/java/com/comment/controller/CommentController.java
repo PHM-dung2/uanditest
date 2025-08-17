@@ -68,7 +68,7 @@ public class CommentController {
 	}
 	
 	// 댓글 수정
-	@PutMapping("/api/comment/update")
+	@PostMapping("/api/comment/update")
 	@ResponseBody
 	public Map<String, Object> commentUpdate( CommentUpdateDto commentUpdateDto ) {
 		
@@ -88,7 +88,7 @@ public class CommentController {
 	}
 	
 	// 댓글 삭제
-	@PutMapping("/api/comment/delete")
+	@PostMapping("/api/comment/delete")
 	@ResponseBody
 	public Map<String, Object> commentDelete( CommentDeleteDto commentDeleteDto ) {
 		

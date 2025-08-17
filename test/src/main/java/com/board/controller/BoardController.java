@@ -144,7 +144,7 @@ public class BoardController{
 	}
 	
 	// 게시물 수정
-	@PutMapping("/api/board/update")
+	@PostMapping("/api/board/update")
 	@ResponseBody
 	public boolean boardUpdate( BoardUpdateDto boardUpdateDto ) throws Exception {
 		
@@ -158,7 +158,7 @@ public class BoardController{
 	}
 	
 	// 게시물 삭제
-	@PutMapping("/api/board/delete")
+	@PostMapping("/api/board/delete")
 	@ResponseBody
 	public Map<String, Object> boardDelete( HttpSession session
 						                  , int board_id
