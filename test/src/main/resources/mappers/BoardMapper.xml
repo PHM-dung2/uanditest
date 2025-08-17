@@ -9,14 +9,11 @@
       SELECT u.user_name
            , b.board_id
            , b.board_title
-           , TO_CHAR(
-               CASE
-	               WHEN b.board_update_at IS NOT NULL
-	                 THEN b.board_update_at
-	               ELSE b.board_create_at
-	             END
-	           , 'YYYY-MM-DD'
-             ) AS board_display_date
+           , CASE
+               WHEN b.board_update_at IS NOT NULL
+                 THEN TO_CHAR(b.board_update_at, 'YYYY-MM-DD') || ' (수정)'
+               ELSE TO_CHAR(b.board_create_at, 'YYYY-MM-DD')
+             END AS board_display_date
            , ( SELECT COUNT(*) 
                FROM comments c
                WHERE c.board_id = b.board_id              
