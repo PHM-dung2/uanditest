@@ -154,8 +154,10 @@
 	                <div class="writeForm">
 	                  <form action="#" class="flex" id="commentForm" name="commentForm">
 		                  <input type="hidden" name="boardNo" value="1">
-		                  <textarea id="comment_content" cols="30" row="5" name="comment_content" class="form-control flex" style="width: 90%" placeholder="내용
-		                  "></textarea>
+		                  <textarea id="comment_content" cols="30" row="5" name="comment_content" 
+		                            class="form-control flex" style="width: 90%" placeholder="내용"
+		                            maxlength="500"
+                      ></textarea>
 		                  <a href="#" class="commentAdd flex" style="width: 9%">
 		                    <button id="reply-button" type="button" class="btn btn-primary btn ml-1" style="margin-top: 0.75rem;width: 100%">등록</button>
 		                  </a>
@@ -294,20 +296,24 @@
 		    $("#updateForm").remove();
 		    $("#replyFormEvent").remove();
 			  commentHead2.hide();
+			  
+			  // 숨겨진 댓글 다시 보이게
+			  $(".comment").show();
+			  $(".commentHead2").show();
 			   
 		    const li = $(this).closest("li");
 			  const parentLevel = li.data("parentlevel");
-			  const tagName = li.data("tagname") ?? '';
 			  const userName = li.data("name");
-			   
-			  const name = tagName === '' ? userName : tagName;
 			   
 			  // 답변 폼
 			  const replyForm =
 				  '<div style="padding-left: 2rem; margin-left: ' + (parentLevel * 20) + 'px;">' +
 		      '  <form action="#" class="flex" id="replyFormEvent" name="replyFormEvent">' +
 		      '    <input type="hidden" name="boardNo" value="1">' +
-		      '    <textarea cols="30" rows="2" id="comment_content" name="comment_content" class="form-control flex" style="width: 90%" placeholder="내용">@' + name + ' </textarea>' +
+		      '    <textarea cols="30" rows="2" id="comment_content" name="comment_content" ' +
+		      '              class="form-control flex" style="width: 90%" placeholder="내용" ' +
+		      '              maxlength="500" ' +
+		      '    >@' + userName + ' </textarea>' +
 		      '    <a href="#" class="commentAdd" style="width: 9%">' +
 		      '      <button id="reply-cancle-button" type="button" class="btn btn-secondary btn ml-1" style="margin-top: 0.75rem;width: 100%">취소</button>' +
 		      '      <button id="reply-button" type="button" class="btn btn-primary btn ml-1" style="margin-top: 0.75rem;width: 100%">등록</button>' +
@@ -338,21 +344,32 @@
 			  const comment = $(this).closest(".commentDiv").find(".comment");
 			  const commentHead2 = $(this).closest(".commentDiv").find(".commentHead2");
 			   
+			  // 버튼 이벤트시 다른 폼 제거
 		    $("#commentForm").hide();
 		    $("#updateForm").remove();
 		    $("#replyFormEvent").remove();
-		    commentHead2.hide();
-		    comment.hide();
+		    
+        // 숨겨진 댓글 다시 보이게
+        $(".comment").show();
+        $(".commentHead2").show();
+        
+        // 해당 댓글 comment, commentHead2 숨기기
+        comment.hide();
+        commentHead2.hide();
 		    
 		    const li = $(this).closest("li");
-		    const userName = li.data("name");
 		    const content = li.data("content");
+        const tagName = li.data("tagname");
+        const name = tagName === "" ? "" : "@" + tagName + " ";
 		    
 		    // 수정 폼
 		    const updateForm =
 		      '<form action="#" class="flex" id="updateForm" name="updateForm">' +
 		      '  <input type="hidden" name="boardNo" value="1">' +
-		      '  <textarea cols="30" rows="2" id="comment_content" name="comment_content" class="form-control flex" style="width: 90%" placeholder="내용">@' + userName + ' ' + content + '</textarea>' +
+		      '    <textarea cols="30" rows="2" id="comment_content" name="comment_content" ' +
+          '              class="form-control flex" style="width: 90%" placeholder="내용" ' +
+          '              maxlength="500" ' +
+          '    >' + name + content + '</textarea>' +
 		      '  <a href="#" class="commentAdd" style="width: 9%">' +
 		      '    <button id="update-cancle-button" type="button" class="btn btn-secondary btn ml-1" style="margin-top: 0.75rem;width: 100%">취소</button>' +
 		      '    <button id="update-button" type="button" class="btn btn-primary btn ml-1" style="margin-top: 0.75rem;width: 100%">수정</button>' +
@@ -392,8 +409,7 @@
 		    const rootId = li.data("rootid") ?? 0;
 		    const parentId = li.data("parentid") ?? 0;
 		    const parentLevel = li.data("parentlevel") ?? -1;
-		    const name = tagName === '' ? userName : tagName;
-			  const content = trimContent( name );
+			  const content = trimContent( userName );
 		    
 		    if( content === '' ){ alert("댓글내용을 입력해주세요."); }
 		     
@@ -404,7 +420,7 @@
 			  formData.append("board_id", board_id);
 			  formData.append("comment_root_id", rootId);
 			  formData.append("comment_parent_id", commentId);
-			  formData.append("tag_name", name);
+			  formData.append("tag_name", userName);
 			  
 			  if( parentLevel == -1 ){
 				  formData.append("comment_parent_level", 0);

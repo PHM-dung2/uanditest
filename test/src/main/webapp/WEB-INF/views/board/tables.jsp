@@ -60,7 +60,7 @@
 		                    <td>${ board.user_name }</td>
 		                    <td><a href="/board/detail?board_id=${ board.board_id }">${ board.board_title }</a></td>
 		                    <td>${ board.board_display_date }</td>
-		                    <td>0개</td>
+		                    <td>${ board.comment_count } 개</td>
 		                  </tr>
                     </c:forEach>
 

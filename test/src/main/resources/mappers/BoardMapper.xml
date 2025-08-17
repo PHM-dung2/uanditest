@@ -17,6 +17,10 @@
 	             END
 	           , 'YYYY-MM-DD'
              ) AS board_display_date
+           , ( SELECT COUNT(*) 
+               FROM comments c
+               WHERE c.board_id = b.board_id              
+             ) AS comment_count
         FROM boards b
   INNER JOIN users u
           ON b.user_id = u.user_id

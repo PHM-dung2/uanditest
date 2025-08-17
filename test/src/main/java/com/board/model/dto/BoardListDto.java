@@ -13,6 +13,9 @@ public class BoardListDto {
 	
 	// 게시판 표시날짜
 	private String board_display_date;
+	
+	// 댓글 개수
+	private int comment_count;
 
 	public int getBoard_id() {
 		return board_id;
@@ -46,10 +49,18 @@ public class BoardListDto {
 		this.board_display_date = board_display_date;
 	}
 
+	public int getComment_count() {
+		return comment_count;
+	}
+
+	public void setComment_count(int comment_count) {
+		this.comment_count = comment_count;
+	}
+
 	@Override
 	public String toString() {
 		return "BoardListDto [board_id=" + board_id + ", user_name=" + user_name + ", board_title=" + board_title
-				+ ", board_display_date=" + board_display_date + "]";
+				+ ", board_display_date=" + board_display_date + ", comment_count=" + comment_count + "]";
 	}
 	
 }
