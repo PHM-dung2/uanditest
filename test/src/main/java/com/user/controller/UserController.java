@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -123,7 +125,14 @@ public class UserController {
 	        Authentication auth = authenticationManager.authenticate(
 	            new UsernamePasswordAuthenticationToken(email, userLoginDto.getUser_password())
 	        );
-	        SecurityContextHolder.getContext().setAuthentication(auth);
+	        
+	        // SecurityContext 생성 및 저장
+	        SecurityContext context = SecurityContextHolder.createEmptyContext();
+	        context.setAuthentication(auth);
+	        SecurityContextHolder.setContext(context);
+
+	        // 세션에 SecurityContext 저장 (이게 있어야 인증이 유지됨)
+	        session.setAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, context);
 
 	    } catch ( Exception e ) {
 	        throw new RuntimeException("이메일 또는 비밀번호가 일치하지 않습니다.");

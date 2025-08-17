@@ -21,7 +21,6 @@ public class SecurityConfig {
     private static final String[] PERMIT_URL_ARRAY = {
 		/* static */
 		"/resources/**",
-		"/board/**",
 		"/css/**",
 		"/img/**",
 		"/js/**",

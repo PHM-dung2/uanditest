@@ -181,7 +181,7 @@
       formData.append("delete_files", fileList);
       
       $.ajax({
-        type: "put",
+        type: "post",
         url: "/api/board/update",
         data: formData,
         dataType: "json",
