@@ -58,25 +58,9 @@
   $("#logoutButton").click(function(e){
     e.preventDefault();
     
-    if( !confirm("로그아웃 하시겠습니까?") ){ return false; }
-    
     logout();
     
   });
-  
-  function logout(){
-	  $.ajax({
-			type: "get",
-			url: "/logout",
-			success: function(){
-			  location.href="/";
-			},
-			error: function(err){
-			  alert("서버 오류. 관리자에게 문의해주세요.");
-			  console.log("서버 오류", err);
-			}
-	  });
-  }
   
   </script>
 

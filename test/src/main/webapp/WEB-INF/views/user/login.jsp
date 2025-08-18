@@ -95,36 +95,28 @@
 	 	  // formData 통신
 	    const form = $('#login_form')[0];
 	    const formData = new FormData(form);
-	  	  
-	  	$.ajax({
-		    type: "post",
-		    url: "/api/login",
-		    data: formData,
-		    processData: false,
-		    contentType: false,
-		    success: function(res) {
-		      console.log("response : ", res);
-		       
-		      if( res === true ){ 
-	          alert("로그인되었습니다.");
-	          location.href = "/";
-	          return true;
-		      }
-
-		      return false;
-		      
-	      },
-	      error: function(jqXHR, testStatus, errorThrown){
-	        const responseText = JSON.parse(jqXHR.responseText);
-
-	        if( responseText.RuntimeException != null ){
-	          alert("에러 발생 : " + responseText.RuntimeException);
-	        }
-	          console.log("실패");
-	      }
-	    });
-    	  
+	    
+	    // ajax
+	    var svcId = "login";
+	    var type = "POST";
+	    var url = "/api/login";
+	  	
+	    ajaxFunc( svcId, type, url, formData, ( svcId, res ) => callBackFunc( svcId, res ) );
+	    
     });
+
+    // 콜백 함수
+    function callBackFunc( svcId, res ){
+   	  console.log("res :", res);
+   	  
+      if( res === true ){ 
+        alert("로그인되었습니다.");
+        location.href = "/";
+        return true;
+      }
+
+      return false;
+    }
     
     // 이메일 저장
     $(document).ready(function(){
@@ -158,18 +150,13 @@
         localStorage.removeItem("userEmail");
       }
     });
-
     
   </script>
 
-  <!-- Bootstrap core JavaScript-->
-  <script src="/resources/vendor/jquery/jquery.min.js"></script>
-  <script src="/resources/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
-  <!-- Core plugin JavaScript-->
-  <script src="/resources/vendor/jquery-easing/jquery.easing.min.js"></script>
-
-  <!-- Custom scripts for all pages-->
-  <script src="/resources/js/sb-admin-2.min.js"></script>
+  <jsp:include page="../common/scripts.jsp"></jsp:include>
+  
+  <!-- 공통 js -->
+  <script src="/resources/js/common.js"></script>
+  
 </body>
 </html>

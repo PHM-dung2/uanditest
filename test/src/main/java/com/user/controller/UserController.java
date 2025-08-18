@@ -1,8 +1,5 @@
 package com.user.controller;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -47,25 +44,21 @@ public class UserController {
 	
 	// 회원가입
 	// Ajax 로 처리
-	@PostMapping("/createUser")
+	@PostMapping("/api/createUser")
 	@ResponseBody
-	public Map<String, Object> joinPost(UserDto userDto) throws Exception{
+	public boolean joinPost(UserDto userDto) throws Exception{
 		
-		Map<String, Object> resultMap = new HashMap<>();
 		System.out.println("USER JOIN 진입");
 		
 		System.out.println("데이터확인 -> " + userDto.getUser_name());
 		
 		boolean result = userService.userJoin(userDto);
-		// insert 성공시 1 이상 , 실패시 0 return
 		
-		resultMap.put("result", result);
-		
-		return resultMap;
+		return result;
 	}
 	
 	// 회원가입 - 이름 중복 체크
-	@PostMapping("/nameCheck")
+	@PostMapping("/api/nameCheck")
 	@ResponseBody
 	public boolean userNameCheck(String name) throws Exception{
 		System.out.println("/nameCheck 시작");
@@ -79,7 +72,7 @@ public class UserController {
 	}
 	
 	// 회원가입 - 이메일 중복 체크
-	@PostMapping("/emailCheck")
+	@PostMapping("/api/emailCheck")
 	@ResponseBody
 	public boolean userEmailCheck(String email) throws Exception{
 		
@@ -94,7 +87,7 @@ public class UserController {
 	}
 	
 	// 회원가입 - 휴대폰번호 중복
-	@PostMapping("/phoneCheck")
+	@PostMapping("/api/phoneCheck")
 	@ResponseBody
 	public boolean userPhoneCheck(String phone) throws Exception{
 
@@ -165,7 +158,7 @@ public class UserController {
 	}
 	
 	// 로그아웃
-	@GetMapping("/logout")
+	@GetMapping("/api/logout")
 	@ResponseBody
 	public void userLogout(HttpSession session) throws Exception{
 		

@@ -59,7 +59,7 @@
             </c:otherwise>
           </c:choose>
           
-          <a class="collapse-item" href="/membership">membership</a>
+          <a class="collapse-item" href="/join">membership</a>
         </div>
       </div>
     </li>
