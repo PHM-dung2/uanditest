@@ -67,6 +67,111 @@ function ajaxFunc( svcId, type, url, inData, callback, async ){
   
 }
 
+// Validation
+  function makeValidator( fn, label ){
+    return { 
+      fn,
+      label,
+      invalidMsg: `사용 불가능한 ${label}입니다.`, 
+      validMsg: `사용 가능한 ${label}입니다.`
+    };
+  }
+  
+  const validators = {
+    name: makeValidator( isValidName, "이름(닉네임)" ),
+    email: makeValidator( isValidEmail, "이메일" ),
+    password: makeValidator( isValidPassword, "비밀번호" ),
+    phone: makeValidator( isValidPhone, "휴대폰번호" ),
+    address: makeValidator( null, "주소" )
+  }
+  
+  // 조사 자동 처리
+  function blankMsg( label ) {
+    const lastChar = label.charCodeAt(label.length - 1);
+    const josa = (lastChar - 44032) % 28 === 0 ? "를" : "을";
+    return `${label}${josa} 입력해주세요.`;
+  }
+  
+  function validResult( valid, msg ){
+    return { valid, msg };
+  }
+  
+  function runValidation( type, value, compareValue = null ){
+    const rule = validators[type];
+    
+    // validator에 해당하는 type이 없을 때
+    if( !rule ){ return validResult( true, "" ); }
+    
+    // 빈값 검증
+      if( !value ){ return validResult( false, blankMsg( rule.label ) ); }
+      
+      // 휴대폰번호는 010 만 입력시에도 alert 출력
+      if( type === "phone" ){
+        if( value === "010" ){ return validResult( false, blankMsg( rule.label ) ); }
+      }
+    
+    // 유효성 검사
+      // 이름(닉네임) alert x
+      if( type === "name" ){ return validResult( true, "" ); }
+    
+      // 비밀번호 비교
+      if( type === "matchedPassword" && compareValue ){
+        if( value === compareValue ){ return validResult( true, "비밀번호가 일치합니다." ); }
+        else{ return validResult( false, "비밀번호가 일치하지 않습니다." ); }
+      }
+      
+      if( !rule.fn( value ) ){ return validResult( false, rule.invalidMsg ); }
+      else{ return validResult( true, rule.validMsg ); }
+    
+  }
+  
+  // 회원가입 유효성검사
+  function validateField( type, el, compareValue = null ) {
+    const result = runValidation( type, el.val(), compareValue );
+    if (!result.valid) {
+      el.focus();
+    }
+
+    // 이름 필드는 alert 무시
+    if ( type !== "name" && result.msg ) {
+      alert(result.msg);
+    }
+
+    return result.valid;
+  }
+  
+  function validateForm( inputs ) {
+    if ( !validateField( "name", inputs.name ) ){ return false; }
+    if ( !validateField( "email", inputs.email ) ){ return false; }
+    if ( !validateField( "password", inputs.password ) ){ return false; }
+    if ( !validateField( "verifiedPassword", inputs.passwordCheck ) ){ return false; }
+    if ( !validateField( "matchedPassword", inputs.password, inputs.passwordCheck ) ){ return false; }
+    if ( !validateField( "phone", inputs.phone ) ){ return false; }
+    if ( !validateField( "address", inputs.roadAddress ) ){ return false; }
+    if ( !validateField( "address", inputs.detailAddress ) ){ return false; }
+    if ( !validateField( "address", inputs.referAddress ) ){ return false; }
+
+    // 2. 마지막에 중복 체크 확인
+    if ( !isNameChecked ) {
+      alert("이름(닉네임) 중복을 확인해주세요.");
+      inputs.name.focus();
+      return false;
+    }
+    if ( !isEmailChecked ) {
+      alert("이메일 중복을 확인해주세요.");
+      inputs.email.focus();
+      return false;
+    }
+    if ( !isPhoneChecked ) {
+      alert("휴대폰 인증을 완료해주세요.");
+      inputs.phone.focus();
+      return false;
+    }
+    
+    return true;
+  }
+
+
 // 정규식 함수
   // 이름(한글, 특수문자 제외)
   function isValidName(name){
@@ -91,14 +196,6 @@ function ajaxFunc( svcId, type, url, inData, callback, async ){
     const phoneRegex = /^010-[0-9]{4}-[0-9]{4}$/;
     return phoneRegex.test(phone);
   }
-
-// vaildation
-function blankCheck( data ){
-  if( data === '' ){ 
-    alert("이메일을 입력해주세요."); 
-    return;
-  }
-}
 
 // 로그아웃
 function logout(){

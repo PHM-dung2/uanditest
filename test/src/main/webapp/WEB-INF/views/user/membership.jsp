@@ -165,7 +165,7 @@
 	  let isNameChecked = false;
 	  let isEmailChecked = false;
 	  let isPasswordChecked = false;
-	  let isCheckPasswordChecked = false;
+	  let isVerifiedPasswordChecked = false;
 	  let isMatchedPasswordChecked = false;
 	  let isPhoneChecked = false;
 	  
@@ -203,7 +203,7 @@
 		    // ajax
 		    var svcId = "nameCheck";
 		    var type = "POST";
-		    var url = "/nameCheck";
+		    var url = "/api/nameCheck";
 		    var inData = { name : name };
 		    	
 		    ajaxFunc( svcId, type, url, inData, ( svcId, res ) => callBackFunc( svcId, res ) );
@@ -246,7 +246,7 @@
 			  // ajax
         var svcId = "emailCheck";
         var type = "POST";
-        var url = "/emailCheck";
+        var url = "/api/emailCheck";
         var inData = { email : email };
           
         ajaxFunc( svcId, type, url, inData, ( svcId, res ) => callBackFunc( svcId, res ) );
@@ -279,7 +279,7 @@
 	    
 	    if( !isValidPassword(passwordCheck) ){
         alert("사용 불가능한 비밀번호입니다.");
-        isCheckPasswordChecked = false;
+        isVerifiedPasswordChecked = false;
         return false;
       }
 	    
@@ -322,7 +322,7 @@
         // ajax
         var svcId = "phoneCheck";
         var type = "POST";
-        var url = "/phoneCheck";
+        var url = "/api/phoneCheck";
         var inData = { phone : phoneNum };
           
         ajaxFunc( svcId, type, url, inData, ( svcId, res ) => callBackFunc( svcId, res ) );
@@ -341,100 +341,30 @@
     if( !confirm("회원가입을 하시겠습니까?") ){ return false; }
     
     // input 값 가져오기
-    const name = $("#user_name");
-    const email = $("#user_email");
-    const password = $("#user_password");
-    const passwordCheck = $("#user_password_check");
-    const phone = $("#user_phone_num");
-    const roadAddress = $("#user_road_address");
-    const detailAddress = $("#user_detail_address");
-    const zonecode = $("#user_zonecode");
-    const referAddress = $("#user_refer_address");
+    const inputs = {
+      name: $("#user_name"),
+      email: $("#user_email"),
+      password: $("#user_password"),
+      passwordCheck: $("#user_password_check"),
+      phone: $("#user_phone_num"),
+      roadAddress: $("#user_road_address"),
+      detailAddress: $("#user_detail_address"),
+      zonecode: $("#user_zonecode"),
+      referAddress: $("#user_refer_address")
+    };
      
     // 빈값
     // 형식
     // 중복체크
     // 포커스 같이
-     
-    if( name.val() === '' ){ 
-   	  alert("이름을 입력해주세요."); 
-   	  name.focus();
-   	  return;
-    }
-    if( email.val() === '' ){
-   	  alert("이메일을 입력해주세요."); 
-   	  email.focus();
-   	  return;
-    }
-    if( password.val() === '' ){
-   	  alert("비밀번호을 입력해주세요."); 
-   	  password.focus();
-   	  return;
-    }
-    if( passwordCheck.val() === '' ){ 
-   	  alert("비밀번호 확인을 입력해주세요."); 
-   	  passwordCheck.focus();
-   	  return;
-    }
-    if( phone.val() === '' || phone.val() === '010' ){
-   	  alert("휴대폰번호를 입력해주세요."); 
-   	  phone.focus();
-   	  return;
-    }
-    if( roadAddress.val() === '' ){
-   	  alert("주소를 입력해주세요."); 
-   	  roadAddress.focus();
-   	  return;
-    }
-    if( detailAddress.val() === '' ){
-   	  alert("상세주소을 입력해주세요."); 
-   	  detailAddress.focus();
-   	  return;
-    }
-    if( zonecode.val() === '' ){
-   	  alert("주소를 입력해주세요."); 
-   	  zonecode.focus();
-   	  return;
-    }
-     
-    // 이중체크
-    if( !isNameChecked || !isValidName(name.val()) ){
-    	alert("사용 불가능한 이름입니다.");
-    	name.focus();
-      return;
-    }
-    if( !isValidEmail(email.val()) ){
-   	  alert("사용 불가능한 이메일입니다."); 
-   	  email.focus();
-   	  return;
-    }
-    if( !isEmailChecked ){
-      alert("이메일 중복을 확인해주세요."); 
-    	email.focus();
-    	return;
-    }
-    if( !isPasswordChecked || !isValidPassword(password.val()) ){
-      alert("사용 불가능한 비밀번호입니다."); 
-      password.focus();
-      return;
-    }
-   	if( !isMatchedPasswordChecked ){
-      alert("비밀번호가 일치하지 않습니다."); 
-      passwordCheck.focus();
-      return;
-    }
-   	if( !isPhoneChecked || !isValidPhone(phone.val()) ){
-   	  alert("사용 불가능한 휴대폰번호입니다."); 
-   	  phone.focus();
-   	  return; 
-   	}
+    if( !validateForm( inputs ) ){ return false; }
      
     // formData 통신
     const form = $('#join_form')[0];
     const formData = new FormData(form);
      
     // phone '-' 제거
-    const phoneNum = phone.val().replace(/-/g, "");
+    const phoneNum = inputs.phone.val().replace(/-/g, "");
     formData.set('user_phone_num', phoneNum);
     
     /*      

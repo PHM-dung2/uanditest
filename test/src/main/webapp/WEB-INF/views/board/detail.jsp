@@ -395,6 +395,8 @@
 		  
 		  // 답변 등록 클릭 이벤트
 		  $(document).on("click", "#reply-button", function(e){
+			  e.preventDefault();
+			  
 		    // 로그아웃시 답글 버튼 막기
 		    if( !preventButton(e) ){ return false; }
 		   
@@ -447,7 +449,9 @@
 					    $("#commentForm").show();
 					    $("#comment_content").val('');
 					    
-					    $("#commentDiv").scrollTop( $("#commentDiv")[0].scrollHeight );
+					    if( tagName === '' ){
+						    $("#commentDiv").scrollTop( $("#commentDiv")[0].scrollHeight );
+					    }
 					    
 				    } else { alert("댓글 작성 실패"); }
 				   
@@ -461,6 +465,8 @@
 		  
 		  // 답변 수정 클릭 이벤트
 	    $(document).on("click", "#update-button", function(e){
+	    	e.preventDefault();
+	    	
 	      // 로그아웃시 답글 버튼 막기
 	      if( !preventButton(e) ){ return false; }
 	     
@@ -506,6 +512,8 @@
 		  
 	    // 답변 삭제 클릭 이벤트
 	    $(document).on("click", ".commentRemove", function(e){
+	    	e.preventDefault();
+	    	
 	      // 로그아웃시 답글 버튼 막기
 	      if( !preventButton(e) ){ return false; }
 	     
