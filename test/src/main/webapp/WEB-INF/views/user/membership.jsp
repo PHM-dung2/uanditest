@@ -162,12 +162,12 @@
   // 정규식
 	  
 	  // 중복체크
-	  let isNameChecked = false;
-	  let isEmailChecked = false;
-	  let isPasswordChecked = false;
-	  let isVerifiedPasswordChecked = false;
-	  let isMatchedPasswordChecked = false;
-	  let isPhoneChecked = false;
+	  var isNameChecked = false;
+	  var isEmailChecked = false;
+	  var isPasswordChecked = false;
+	  var isVerifiedPasswordChecked = false;
+	  var isMatchedPasswordChecked = false;
+	  var isPhoneChecked = false;
 	  
 	  // 이름(특수문자, 한글 입력 불가)
 	  let isComposing = false;
@@ -192,11 +192,13 @@
 		  // 이름(focus 이동시 사용가능여부 출력)
 		  .change(function(){
 			  const name = $("#user_name").val();
+			  const nameIsvalid = $(".name_isvalid");
 		    isNameChecked = false;
 		    
-		    // 이름 정규식
-		    if( !isValidName(name) ){
-		    	$(".name_isvalid").html("사용 불가능한 닉네임입니다."); 
+		    // validation
+		    const nameValidation = runValidation( "name", name );
+		    if( !nameValidation.valid ){
+		    	nameIsvalid.html( nameValidation.msg ); 
           isNameChecked = false;
 		    }
 		    
@@ -206,7 +208,7 @@
 		    var url = "/api/nameCheck";
 		    var inData = { name : name };
 		    	
-		    ajaxFunc( svcId, type, url, inData, ( svcId, res ) => callBackFunc( svcId, res ) );
+		    ajaxFunc( svcId, type, url, inData, callBackFunc );
 		    
 	    })
 	  
@@ -234,64 +236,44 @@
 	  // 이메일 중복 검사
 	  $("#email_button")
 		  .click(function(){
-			  const email = $("#user_email").val();
+			  const email = $("#user_email");
 			  
-			  if( !isValidEmail(email) ){
-          alert("사용 불가능한 이메일입니다.");
-          $("#user_email").focus();
-          isEmailChecked = false;
-          return false;
-			  }
+			  // validation
+			  if ( !validateField( "email", email, false ) ){ return false; }
 			  
 			  // ajax
         var svcId = "emailCheck";
         var type = "POST";
         var url = "/api/emailCheck";
-        var inData = { email : email };
+        var inData = { email : email.val() };
           
-        ajaxFunc( svcId, type, url, inData, ( svcId, res ) => callBackFunc( svcId, res ) );
+        ajaxFunc( svcId, type, url, inData, callBackFunc );
 			  
-		  })
+	  })
 	  
 	  // 비밀번호
 	  $("#user_password").change(function(){
-	    const password = $("#user_password").val();
+	    const password = $("#user_password");
 	    isPasswordChecked = false;
 	    
-	    if( !isValidPassword(password) ){
-		    	alert("사용 불가능한 비밀번호입니다.");
-		    	isPasswordChecked = false;
-		    	return false;
-	    }else{ 
-		    	alert("사용 가능한 비밀번호입니다.");
-		    	isPasswordChecked = true;
-		    	return false;
-	    }
+	    if( password.val() === "" ){ return false; }
+	    
+	    // validation
+	    validateField( "password", password );
 	  })
 	  
 	  // 비밀번호 확인
 	  $("#user_password_check").change(function(){
-		  const password = $("#user_password").val();
-	    const passwordCheck = $("#user_password_check").val();
+		  const password = $("#user_password");
+	    const passwordCheck = $("#user_password_check");
 	    isMatchedPasswordChecked = false;
 	    
-	    if( passwordCheck === '' ){ return; }
+	    if( passwordCheck.val() === "" ){ return false; }
 	    
-	    if( !isValidPassword(passwordCheck) ){
-        alert("사용 불가능한 비밀번호입니다.");
-        isVerifiedPasswordChecked = false;
-        return false;
-      }
-	    
-	    if( passwordCheck === password ){
-	      alert("비밀번호가 일치합니다.");
-	      isMatchedPasswordChecked = true;
-	      return false;
-	    }else{
-	    	alert("비밀번호가 일치하지 않습니다.");
-	    	isMatchedPasswordChecked = false;
-	      return false;
-	    }
+	    // 비밀번호 확인 검증
+	    if ( !validateField( "verifiedPassword", passwordCheck ) ){ return false; }
+	    // 비밀번호 일치 여부 검증
+	    if ( !validateField( "matchedPassword", passwordCheck, true, password ) ){ return false; }
 	  })
 	 
 	  // 휴대폰번호 확인
@@ -307,17 +289,14 @@
 		    }
 		  })
 		  .change(function(){
-			  const phone = $(this).val();
+			  const phone = $(this);
 			  if( phone === '' || phone === "010" ){ return false; }
 			  
-        if( !isValidPhone(phone) ){ 
-   	      alert("사용 불가능한 휴대폰번호입니다.");
-   	      isPhoneChecked = false;
-   	      return false;
-	  	  }
+			  // 휴대폰 번호 확인
+			  if ( !validateField( "phone", phone, false ) ){ return false; }
         
         // phone '-' 제거
-        const phoneNum = phone.replace(/-/g, "");
+        const phoneNum = phone.val().replace(/-/g, "");
         
         // ajax
         var svcId = "phoneCheck";
@@ -325,7 +304,7 @@
         var url = "/api/phoneCheck";
         var inData = { phone : phoneNum };
           
-        ajaxFunc( svcId, type, url, inData, ( svcId, res ) => callBackFunc( svcId, res ) );
+        ajaxFunc( svcId, type, url, inData, callBackFunc );
         
 		  })
       .focusin(function(){
@@ -375,57 +354,70 @@
      
     var svcId = "createUser";
     var type = "POST";
-    var url = "/createUser";
+    var url = "/api/createUser";
     
-    ajaxFunc( svcId, type, url, formData, ( svcId, res ) => callBackFunc( svcId, res ) );
+    ajaxFunc( svcId, type, url, formData, callBackFunc );
 
   });
   
   //콜백 함수
   function callBackFunc( svcId, res ){
-	  console.log("response : ", res);
-	  
-	  if( svcId === "nameCheck" ){
-      if( res === false ) { 
-    	  $(".name_isvalid").html("사용 불가능한 닉네임입니다."); 
-    	  $("#user_name").focus();
+    console.log("response : ", res);
+    
+    // 메시지 템플릿
+    const getMessages = (type) => ({
+      success: "사용 가능한" + type + "입니다.",
+      fail: "사용 불가능한 " + type + "입니다."
+    });
+    
+    if( svcId === "nameCheck" ){
+      const nameIsvalid = $(".name_isvalid");
+      const msg = getMessages("이름(닉네임)");
+        
+      if( res === false ) {
+        nameIsvalid.html( msg.fail );
+        $("#user_name").focus();
         isNameChecked = false;
-      }
-      else{ 
-    	  $(".name_isvalid").html("사용 가능한 닉네임입니다.");
+      } else {
+        nameIsvalid.html(msg.success);
         isNameChecked = true;
       }
-	  }
-	  
-	  if( svcId === "emailCheck" ){
-		  if( res === false ){
-        alert("사용 불가능한 이메일입니다.");
+    }
+    
+    if( svcId === "emailCheck" ){
+      const msg = getMessages("이메일");
+        
+      if( res === false ){
+        alert( msg.fail );
         $("#user_email").focus();
         isEmailChecked = false;
-      }else{ 
-        alert("사용 가능한 이메일입니다."); 
+      } else {
+        alert( msg.success );
         isEmailChecked = true;
       }
-	  }
-	  
-	  if( svcId === "phoneCheck" ){
-		  if( res === false ){
-        alert("사용 불가능한 휴대폰번호입니다.");
+    }
+    
+    if( svcId === "phoneCheck" ){
+      const msg = getMessages("휴대폰 번호");
+        
+      if( res === false ){
+        alert( msg.fail );
         $("#user_phone_num").focus();
         isPhoneChecked = false;
-      }else{ 
-        alert("사용 가능한 휴대폰번호입니다."); 
+      } else {
+        alert( msg.success );
         isPhoneChecked = true;
       }
-	  }
-	  
-	  if( svcId === "createUser" ){
-		  if( res === true ){ 
-         alert("회원가입이 완료되었습니다.");
-         location.href="/login";
-      }else{ alert("회원가입 실패"); }
-	  }
+    }
     
+    if( svcId === "createUser" ){
+      if( res === true ){
+        alert("회원가입이 완료되었습니다.");
+        location.href="/login";
+      } else { 
+        alert("회원가입 실패"); 
+      }
+    }
   }
 
   </script>

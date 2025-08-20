@@ -288,7 +288,7 @@
 		    // 로그아웃시 답글 버튼 막기
 			  if( !preventButton(e) ){ return false; }
 		
-	 		  const commentDiv = $(this).closest(".commentDiv");
+	 		  const comment = $(this).closest(".commentDiv").find(".comment");
 			  const commentHead2 = $(this).closest(".commentDiv").find(".commentHead2");
 		
 		    // 버튼 이벤트시 다른 폼 제거
@@ -302,26 +302,13 @@
 			  $(".commentHead2").show();
 			   
 		    const li = $(this).closest("li");
-			  const parentLevel = li.data("parentlevel");
 			  const userName = li.data("name");
+			  const name = "@" + userName + " ";
 			   
 			  // 답변 폼
-			  const replyForm =
-				  '<div style="padding-left: 2rem; margin-left: ' + (parentLevel * 20) + 'px;">' +
-		      '  <form action="#" class="flex" id="replyFormEvent" name="replyFormEvent">' +
-		      '    <input type="hidden" name="boardNo" value="1">' +
-		      '    <textarea cols="30" rows="2" id="comment_content" name="comment_content" ' +
-		      '              class="form-control flex" style="width: 90%" placeholder="내용" ' +
-		      '              maxlength="500" ' +
-		      '    >@' + userName + ' </textarea>' +
-		      '    <a href="#" class="commentAdd" style="width: 9%">' +
-		      '      <button id="reply-cancle-button" type="button" class="btn btn-secondary btn ml-1" style="margin-top: 0.75rem;width: 100%">취소</button>' +
-		      '      <button id="reply-button" type="button" class="btn btn-primary btn ml-1" style="margin-top: 0.75rem;width: 100%">등록</button>' +
-		      '    </a>' +
-		      '  </form>' +
-		      '</div>';
+			  const replyForm = createCommentForm( "reply", name );
 		       
-		    commentDiv.after(replyForm);
+		    comment.after(replyForm);
 			   
 		  });
 		   
@@ -363,18 +350,7 @@
         const name = tagName === "" ? "" : "@" + tagName + " ";
 		    
 		    // 수정 폼
-		    const updateForm =
-		      '<form action="#" class="flex" id="updateForm" name="updateForm">' +
-		      '  <input type="hidden" name="boardNo" value="1">' +
-		      '    <textarea cols="30" rows="2" id="comment_content" name="comment_content" ' +
-          '              class="form-control flex" style="width: 90%" placeholder="내용" ' +
-          '              maxlength="500" ' +
-          '    >' + name + content + '</textarea>' +
-		      '  <a href="#" class="commentAdd" style="width: 9%">' +
-		      '    <button id="update-cancle-button" type="button" class="btn btn-secondary btn ml-1" style="margin-top: 0.75rem;width: 100%">취소</button>' +
-		      '    <button id="update-button" type="button" class="btn btn-primary btn ml-1" style="margin-top: 0.75rem;width: 100%">수정</button>' +
-		      '  </a>' +
-		      '</form>';
+		    const updateForm = createCommentForm( "update", name + content );
 		      
 		    comment.after(updateForm);
 		    
@@ -430,36 +406,12 @@
 				  formData.append("comment_parent_level", Number(parentLevel) + 1);
 			  }
 			  
-			  $.ajax({
-				  type: "post",
-				  url: "/api/comment/write",
-				  async: true,
-				  data: formData,
-				  dataType: "json",
-				  processData: false,
-				  contentType: false,
-				  success: function(res){
-				  console.log("res : ", res);
-				   
-				    if( res.result === true ){ 
-					    alert("댓글 작성이 완료되었습니다."); 
-					    
-					    asyncComment( res.commentList );
-					    renderComment();
-					    $("#commentForm").show();
-					    $("#comment_content").val('');
-					    
-					    if( tagName === '' ){
-						    $("#commentDiv").scrollTop( $("#commentDiv")[0].scrollHeight );
-					    }
-					    
-				    } else { alert("댓글 작성 실패"); }
-				   
-				  },
-				  error: function(){
-		
-				  }
-			  })
+			  // ajax
+			  var svcId = "commentWrite";
+			  var type = "POST";
+			  var url = "/api/comment/write";
+			  
+			  ajaxFunc( svcId, type, url, formData, callBackFunc );
 			   
 		  });
 		  
@@ -552,7 +504,83 @@
         })
 	      
 	    });
+	    
+	    //콜백 함수
+	    function callBackFunc( svcId, res ){
+	      console.log("response : ", res);
+	      
+	      // 메시지 템플릿
+	      const getMessages = (type) => ({
+	        success: "사용 가능한" + type + "입니다.",
+	        fail: "사용 불가능한 " + type + "입니다."
+	      });
+	      
+	      if( svcId === "commentWrite" ){
+	        if( res.result === true ){ 
+            alert("댓글 작성이 완료되었습니다."); 
+            
+            asyncComment( res.commentList );
+            renderComment();
+            $("#commentForm").show();
+            $("#comment_content").val('');
+            
+            if( tagName === '' ){
+              $("#commentDiv").scrollTop( $("#commentDiv")[0].scrollHeight );
+            }
+            
+          } else { alert("댓글 작성 실패"); } 
+
+	      }
+	      
+	      if( svcId === "emailCheck" ){
+	        const msg = getMessages("이메일");
+	          
+	        if( res === false ){
+	          alert( msg.fail );
+	          $("#user_email").focus();
+	          isEmailChecked = false;
+	        } else {
+	          alert( msg.success );
+	          isEmailChecked = true;
+	        }
+	      }
+	      
+	      if( svcId === "phoneCheck" ){
+	        const msg = getMessages("휴대폰 번호");
+	          
+	        if( res === false ){
+	          alert( msg.fail );
+	          $("#user_phone_num").focus();
+	          isPhoneChecked = false;
+	        } else {
+	          alert( msg.success );
+	          isPhoneChecked = true;
+	        }
+	      }
+
+	    }
 		  
+	    // 공통 폼 생성 함수
+	    function createCommentForm( type, content ){
+	    	const replyStyle = type === "reply" ? 'style="padding-left: 1rem;' : '';
+	    	const btnName = type === "reply" ? '등록' : '수정';
+	    	
+	    	const form =
+           '<form action="#" class="flex" id="replyFormEvent" name="replyFormEvent"' + replyStyle + ' >' +
+           '  <input type="hidden" name="boardNo" value="1">' +
+           '  <textarea cols="30" rows="2" id="comment_content" name="comment_content" ' +
+           '            class="form-control flex" style="width: 90%" placeholder="내용" ' +
+           '            maxlength="500" ' +
+           '  >' + content + ' </textarea>' +
+           '  <a href="#" class="commentAdd" style="width: 9%">' +
+           '    <button id="' + type + '-cancle-button" type="button" class="btn btn-secondary btn ml-1" style="margin-top: 0.75rem;width: 100%">취소</button>' +
+           '    <button id="' + type + '-button" type="button" class="btn btn-primary btn ml-1" style="margin-top: 0.75rem;width: 100%">' + btnName + '</button>' +
+           '  </a>' +
+           '</form>';
+        
+        return form;
+	    }
+	    
 		   
 		  // 로그아웃시 버튼 막기
 		  function preventButton(e){
@@ -645,21 +673,10 @@
   
   </script>
 
-  <!-- Bootstrap core JavaScript-->
-  <script src="/resources/vendor/jquery/jquery.min.js"></script>
-  <script src="/resources/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <jsp:include page="../common/scripts.jsp"></jsp:include>
+  
+  <!-- 공통 js -->
+  <script src="/resources/js/common.js"></script>
 
-  <!-- Core plugin JavaScript-->
-  <script src="/resources/vendor/jquery-easing/jquery.easing.min.js"></script>
-
-  <!-- Custom scripts for all pages-->
-  <script src="/resources/js/sb-admin-2.min.js"></script>
-
-  <!-- Page level plugins -->
-  <script src="/resources/vendor/datatables/jquery.dataTables.min.js"></script>
-  <script src="/resources/vendor/datatables/dataTables.bootstrap4.min.js"></script>
-
-  <!-- Page level custom scripts -->
-  <script src="/resources/js/demo/datatables-demo.js"></script>
 </body>
 </html>

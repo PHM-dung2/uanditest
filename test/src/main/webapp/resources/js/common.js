@@ -33,12 +33,8 @@ function ajaxFunc( svcId, type, url, inData, callback, async ){
     async: async ?? true,
     success: function( res ){
       console.log( res );
-      if ( res !== "" ) {
-          callback( svcId, res );
-      } else {
-          res = "";
-          callback( svcId, res );
-      }
+      
+      callback( svcId, res );
     },
     error: function( jqXHR, textStatus, errorThrown ){
       console.log("jqXHR.status:", jqXHR.status);             // ex: 404
@@ -56,6 +52,7 @@ function ajaxFunc( svcId, type, url, inData, callback, async ){
   
   if ( type.toLowerCase() !== "get" ) {
       ajaxOptions.data = inData;
+      ajaxOptions.dataType = "json";
   }
   
   if ( inData instanceof FormData ) {
@@ -68,6 +65,7 @@ function ajaxFunc( svcId, type, url, inData, callback, async ){
 }
 
 // Validation
+  // validator 객체 생성
   function makeValidator( fn, label ){
     return { 
       fn,
@@ -81,7 +79,8 @@ function ajaxFunc( svcId, type, url, inData, callback, async ){
     name: makeValidator( isValidName, "이름(닉네임)" ),
     email: makeValidator( isValidEmail, "이메일" ),
     password: makeValidator( isValidPassword, "비밀번호" ),
-    phone: makeValidator( isValidPhone, "휴대폰번호" ),
+    matchedPassword: makeValidator( null, "비밀번호 중복 여부" ),
+    phone: makeValidator( isValidPhone, "휴대폰 번호" ),
     address: makeValidator( null, "주소" )
   }
   
@@ -92,10 +91,12 @@ function ajaxFunc( svcId, type, url, inData, callback, async ){
     return `${label}${josa} 입력해주세요.`;
   }
   
+  // 결과 객체 생성
   function validResult( valid, msg ){
     return { valid, msg };
   }
   
+  // 검증 로직
   function runValidation( type, value, compareValue = null ){
     const rule = validators[type];
     
@@ -103,7 +104,7 @@ function ajaxFunc( svcId, type, url, inData, callback, async ){
     if( !rule ){ return validResult( true, "" ); }
     
     // 빈값 검증
-      if( !value ){ return validResult( false, blankMsg( rule.label ) ); }
+      if( value === "" ){ return validResult( false, blankMsg( rule.label ) ); }
       
       // 휴대폰번호는 010 만 입력시에도 alert 출력
       if( type === "phone" ){
@@ -111,42 +112,43 @@ function ajaxFunc( svcId, type, url, inData, callback, async ){
       }
     
     // 유효성 검사
-      // 이름(닉네임) alert x
-      if( type === "name" ){ return validResult( true, "" ); }
+      // 이름(닉네임), 주소 alert x
+      if( type === "name" || type === "address" ){ 
+        return validResult( true, "" ); 
+      }
     
       // 비밀번호 비교
       if( type === "matchedPassword" && compareValue ){
-        if( value === compareValue ){ return validResult( true, "비밀번호가 일치합니다." ); }
-        else{ return validResult( false, "비밀번호가 일치하지 않습니다." ); }
+        if( value !== compareValue ){ return validResult( false, "비밀번호가 일치하지 않습니다." ); }
+        else{ return validResult( true, "비밀번호가 일치합니다." ); }
       }
       
       if( !rule.fn( value ) ){ return validResult( false, rule.invalidMsg ); }
       else{ return validResult( true, rule.validMsg ); }
-    
+
   }
   
-  // 회원가입 유효성검사
-  function validateField( type, el, compareValue = null ) {
-    const result = runValidation( type, el.val(), compareValue );
-    if (!result.valid) {
-      el.focus();
-    }
+  // UI 처리
+  function validateField( type, el, showSuccessMsg = true , compareValue = null, ) {
+    const compareVal = compareValue && compareValue.val ? compareValue.val() : compareValue;
+    
+    const result = runValidation( type, el.val(), compareVal );
+    if ( !result.valid ) { el.focus(); }
 
-    // 이름 필드는 alert 무시
-    if ( type !== "name" && result.msg ) {
-      alert(result.msg);
+    // msg 내용이 있으면 alert 출력
+    if ( result.msg && ( !result.valid || showSuccessMsg ) ) {
+      alert( result.msg );
     }
 
     return result.valid;
   }
   
   function validateForm( inputs ) {
-    if ( !validateField( "name", inputs.name ) ){ return false; }
-    if ( !validateField( "email", inputs.email ) ){ return false; }
-    if ( !validateField( "password", inputs.password ) ){ return false; }
-    if ( !validateField( "verifiedPassword", inputs.passwordCheck ) ){ return false; }
-    if ( !validateField( "matchedPassword", inputs.password, inputs.passwordCheck ) ){ return false; }
-    if ( !validateField( "phone", inputs.phone ) ){ return false; }
+    if ( !validateField( "name", inputs.name, false ) ){ return false; }
+    if ( !validateField( "email", inputs.email, false ) ){ return false; }
+    if ( !validateField( "password", inputs.password, false ) ){ return false; }
+    if ( !validateField( "matchedPassword", inputs.passwordCheck, false, inputs.password ) ){ return false; }
+    if ( !validateField( "phone", inputs.phone, false ) ){ return false; }
     if ( !validateField( "address", inputs.roadAddress ) ){ return false; }
     if ( !validateField( "address", inputs.detailAddress ) ){ return false; }
     if ( !validateField( "address", inputs.referAddress ) ){ return false; }
@@ -163,7 +165,7 @@ function ajaxFunc( svcId, type, url, inData, callback, async ){
       return false;
     }
     if ( !isPhoneChecked ) {
-      alert("휴대폰 인증을 완료해주세요.");
+      alert("사용 불가능한 휴대폰 번호입니다.");
       inputs.phone.focus();
       return false;
     }
@@ -207,7 +209,7 @@ function logout(){
   var url = "/api/logout";
   var inData = "";
   
-  ajaxFunc( svcId, type, url, inData, ( svcId, res ) => commonCallBack( svcId, res ) );
+  ajaxFunc( svcId, type, url, inData, commonCallBack );
   
 }
 
