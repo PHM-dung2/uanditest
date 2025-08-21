@@ -19,12 +19,12 @@ public interface BoardMapper {
 	public BoardDetailDto boardDetail( int board_id );
 	
 	// 게시물 수정
-	public int boardUpdate( BoardUpdateDto boardUpdateDto );
+	public boolean boardUpdate( BoardUpdateDto boardUpdateDto );
 	
 	// 게시물 등록
-	public int boardWrite( BoardWriteDto boardWriteDto );
+	public boolean boardWrite( BoardWriteDto boardWriteDto );
 	
 	// 게시물 삭제
-	public int boardDelete( int board_id );
+	public boolean boardDelete( int board_id );
 	
 }

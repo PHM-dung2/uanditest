@@ -246,38 +246,13 @@
 	    $("#delete_btn").click(function(){
 	   	  if( !confirm("게시물을 삭제하시겠습니까?") ){ return false; }
 	   	  
-	   	  $.ajax({
-	   		  type: "post",
-	   		  url: "/api/board/delete",
-	   		  data: { board_id : board_id },
-	   		  dataType: "json",
-	   		  success: function(res){
-	   			  
-	   			  // session은 공통으로 묶어서 Exception 처리하는 것이 좋아보임!
-	   			  if( res.result === false ){
-	   				  // 세션 체크
-	   				  if( res.message === "notSession" ){
-	   					  alert("세션 시간 초과. 로그인 후 다시 시도해주세요.");
-	   					  location.href="/login";
-	   					  return false;
-	   				  }
-	   				  // 삭제 실패
-	   				  if( res.message === "deleteFail" ){
-	   					  alert("삭제 실패.");
-	   					  return false;
-	   				  }
-	   			  }else{
-	   				  alert("삭제되었습니다.");
-	   				  location.href="/";
-	   				  return true;
-	   			  }
-	   			  
-	   		  },
-	   		  error: function(err){
-	   			  alert("서버 오류. 관리자에게 문의해주세요.");
-	   	      console.log("서버 오류", err);
-	   		  }
-	   	  });
+	   	  // ajax
+	      var svcId = "boardDelete";
+	      var type = "POST";
+	      var url = "/api/board/delete";
+	      var inData = { board_id : board_id }
+	      
+	      ajaxFunc( svcId, type, url, inData, callBackFunc );
 	   	  
 	    });
     
@@ -285,31 +260,19 @@
     // 답글 
 		  // 답변 폼 생성 
 		  $(document).on("click", ".commentReply", function(e){
+			  const comment = $(this).closest(".commentDiv").find(".comment");
+			  const userName = $(this).closest("li").data("name");
+			  const name = "@" + userName + " ";
+			  
 		    // 로그아웃시 답글 버튼 막기
 			  if( !preventButton(e) ){ return false; }
-		
-	 		  const comment = $(this).closest(".commentDiv").find(".comment");
-			  const commentHead2 = $(this).closest(".commentDiv").find(".commentHead2");
-		
-		    // 버튼 이벤트시 다른 폼 제거
-		    $("#commentForm").hide();
-		    $("#updateForm").remove();
-		    $("#replyFormEvent").remove();
-			  commentHead2.hide();
 			  
-			  // 숨겨진 댓글 다시 보이게
-			  $(".comment").show();
-			  $(".commentHead2").show();
+		    // 폼 상태 초기화
+			  prepareCommentEdit("reply", $(this));
 			   
-		    const li = $(this).closest("li");
-			  const userName = li.data("name");
-			  const name = "@" + userName + " ";
-			   
-			  // 답변 폼
+			  // 답변 폼 생성
 			  const replyForm = createCommentForm( "reply", name );
-		       
 		    comment.after(replyForm);
-			   
 		  });
 		   
 		  // 답글 취소 클릭 이벤트
@@ -324,36 +287,21 @@
 		   
 		  // 수정 폼 생성 
 		  $(document).on("click", ".commentModify", function(e){
-		
-			  // 로그아웃시 답글 버튼 막기
-			  if( !preventButton(e) ){ return false; }
-		   
 			  const comment = $(this).closest(".commentDiv").find(".comment");
-			  const commentHead2 = $(this).closest(".commentDiv").find(".commentHead2");
-			   
-			  // 버튼 이벤트시 다른 폼 제거
-		    $("#commentForm").hide();
-		    $("#updateForm").remove();
-		    $("#replyFormEvent").remove();
-		    
-        // 숨겨진 댓글 다시 보이게
-        $(".comment").show();
-        $(".commentHead2").show();
-        
-        // 해당 댓글 comment, commentHead2 숨기기
-        comment.hide();
-        commentHead2.hide();
-		    
 		    const li = $(this).closest("li");
 		    const content = li.data("content");
         const tagName = li.data("tagname");
         const name = tagName === "" ? "" : "@" + tagName + " ";
+			  
+			  // 로그아웃시 답글 버튼 막기
+			  if( !preventButton(e) ){ return false; }
+			   
+			  // 폼 상태 초기화
+			  prepareCommentEdit("update", $(this));
 		    
-		    // 수정 폼
+		    // 수정 폼 생성
 		    const updateForm = createCommentForm( "update", name + content );
-		      
 		    comment.after(updateForm);
-		    
 		  });
 		   
 		  // 수정 취소 클릭 이벤트
@@ -362,7 +310,7 @@
 		    const comment = $(this).closest(".commentDiv").find(".comment");
 		    const commentHead2 = $(this).closest(".commentDiv").find(".commentHead2");
 			     
-		    $("#updateForm").remove();
+		    $("#updateFormEvent").remove();
 		    $("#commentForm").show();
 		    commentHead2.show();
 		    comment.show();
@@ -383,28 +331,23 @@
 			  const commentId = li.data("commentid") ?? 0;
 			  const tagName = li.data("tagname") ?? '';
 			  const userName = li.data("name") ?? '';
+		    const parentLevel = li.data("parentlevel") ?? -1;
 			  const userId = li.data("id") ?? 0;
 		    const rootId = li.data("rootid") ?? 0;
 		    const parentId = li.data("parentid") ?? 0;
-		    const parentLevel = li.data("parentlevel") ?? -1;
 			  const content = trimContent( userName );
 		    
 		    if( content === '' ){ alert("댓글내용을 입력해주세요."); }
 		     
 		    // formData
-			  let formData = new FormData();
+			  var formData = new FormData();
 			   
 			  formData.append("comment_content", content);	   
 			  formData.append("board_id", board_id);
 			  formData.append("comment_root_id", rootId);
 			  formData.append("comment_parent_id", commentId);
 			  formData.append("tag_name", userName);
-			  
-			  if( parentLevel == -1 ){
-				  formData.append("comment_parent_level", 0);
-			  }else{
-				  formData.append("comment_parent_level", Number(parentLevel) + 1);
-			  }
+			  formData.append("comment_parent_level", parentLevel + 1);
 			  
 			  // ajax
 			  var svcId = "commentWrite";
@@ -428,6 +371,7 @@
         const li = $(this).closest("li");
         const commentId = li.data("commentid") ?? 0;
         const tagName = li.data("tagname") ?? '';
+        const userName = li.data("name") ?? '';
         const name = tagName === '' ? userName : tagName;
         const content = trimContent( name );
 	      
@@ -436,29 +380,13 @@
     		  comment_content : content,
     		  board_id : board_id
     		}
-	   	
-	      $.ajax({
-          type: "post",
-          url: "/api/comment/update",
-          async: true,
-          data: data,
-          dataType: "json",
-          success: function(res){
-          console.log("res : ", res);
-           
-            if( res.result === true ){ 
-              alert("댓글 수정이 완료되었습니다."); 
-              
-              asyncComment( res.commentList );
-              renderComment();
-              
-            } else { alert("댓글 수정 실패"); }
-           
-          },
-          error: function(){
-    
-          }
-        })
+	      
+	      // ajax
+        var svcId = "commentUpdate";
+        var type = "POST";
+        var url = "/api/comment/update";
+        
+        ajaxFunc( svcId, type, url, data, callBackFunc );
 	      
 	    });
 		  
@@ -479,29 +407,13 @@
           comment_id : commentId,
           board_id : board_id
         }
-	      
-	      $.ajax({
-          type: "post",
-          url: "/api/comment/delete",
-          async: true,
-          data: data,
-          dataType: "json",
-          success: function(res){
-          console.log("res : ", res);
-           
-            if( res.result === true ){ 
-              alert("댓글 삭제가 완료되었습니다."); 
-              
-              asyncComment( res.commentList );
-              renderComment();
-              
-            } else { alert("댓글 삭제 실패"); }
-           
-          },
-          error: function(){
-    
-          }
-        })
+        
+         // ajax
+        var svcId = "commentDelete";
+        var type = "POST";
+        var url = "/api/comment/delete";
+        
+        ajaxFunc( svcId, type, url, data, callBackFunc );
 	      
 	    });
 	    
@@ -510,68 +422,78 @@
 	      console.log("response : ", res);
 	      
 	      // 메시지 템플릿
-	      const getMessages = (type) => ({
-	        success: "사용 가능한" + type + "입니다.",
-	        fail: "사용 불가능한 " + type + "입니다."
-	      });
-	      
-	      if( svcId === "commentWrite" ){
-	        if( res.result === true ){ 
-            alert("댓글 작성이 완료되었습니다."); 
+	      const getAlert = (type) => {
+	    	  if( res.result === true ){ 
+            alert("댓글 " + type + "이 완료되었습니다."); 
             
             asyncComment( res.commentList );
             renderComment();
-            $("#commentForm").show();
-            $("#comment_content").val('');
             
-            if( tagName === '' ){
-              $("#commentDiv").scrollTop( $("#commentDiv")[0].scrollHeight );
+            if( type === "작성" ){
+            	$("#commentForm").show();
+              $("#comment_content").val('');
+              
+              if( res.level === 0 ){
+                $("#commentDiv").scrollTop( $("#commentDiv")[0].scrollHeight );
+              }
             }
             
-          } else { alert("댓글 작성 실패"); } 
-
+          } else { alert("댓글 " + type + " 실패"); }
+	      };
+	      
+	      if( svcId === "boardDelete" ){
+	    	  // session은 공통으로 묶어서 Exception 처리하는 것이 좋아보임!
+          if( res === true ){
+        	  alert("삭제되었습니다.");
+            location.href="/";
+            return true;
+          }else{
+        	  alert("삭제 실패.");
+            return false;
+          }
 	      }
 	      
-	      if( svcId === "emailCheck" ){
-	        const msg = getMessages("이메일");
-	          
-	        if( res === false ){
-	          alert( msg.fail );
-	          $("#user_email").focus();
-	          isEmailChecked = false;
-	        } else {
-	          alert( msg.success );
-	          isEmailChecked = true;
-	        }
-	      }
+	      if( svcId === "commentWrite" ){ getAlert("작성"); }
 	      
-	      if( svcId === "phoneCheck" ){
-	        const msg = getMessages("휴대폰 번호");
-	          
-	        if( res === false ){
-	          alert( msg.fail );
-	          $("#user_phone_num").focus();
-	          isPhoneChecked = false;
-	        } else {
-	          alert( msg.success );
-	          isPhoneChecked = true;
-	        }
-	      }
+	      if( svcId === "commentUpdate" ){ getAlert("수정"); }
+	      
+	      if( svcId === "commentDelete" ){ getAlert("삭제"); }
 
 	    }
 		  
+      // 공통 폼 초기화 이벤트
+      function prepareCommentEdit( type, el ){
+        const comment = el.closest(".commentDiv").find(".comment");
+        const commentHead2 = el.closest(".commentDiv").find(".commentHead2");
+        
+        // 버튼 이벤트시 다른 폼 제거
+        $("#commentForm").hide();
+        $("#updateFormEvent").remove();
+        $("#replyFormEvent").remove();
+        
+        // 숨겨진 댓글 다시 보이게
+        $(".comment").show();
+        $(".commentHead2").show();
+        
+        // 해당 댓글 comment, commentHead2 숨기기
+        if( type === "update" ){
+          comment.hide();
+        }
+        commentHead2.hide();
+      }
+	    
 	    // 공통 폼 생성 함수
 	    function createCommentForm( type, content ){
 	    	const replyStyle = type === "reply" ? 'style="padding-left: 1rem;' : '';
 	    	const btnName = type === "reply" ? '등록' : '수정';
 	    	
 	    	const form =
-           '<form action="#" class="flex" id="replyFormEvent" name="replyFormEvent"' + replyStyle + ' >' +
+           '<form action="#" class="flex" id="' + type + 'FormEvent" name="replyFormEvent"' + replyStyle + ' >' +
            '  <input type="hidden" name="boardNo" value="1">' +
            '  <textarea cols="30" rows="2" id="comment_content" name="comment_content" ' +
            '            class="form-control flex" style="width: 90%" placeholder="내용" ' +
            '            maxlength="500" ' +
-           '  >' + content + ' </textarea>' +
+           '  >' + content + '</textarea>' +
            '  <a href="#" class="commentAdd" style="width: 9%">' +
            '    <button id="' + type + '-cancle-button" type="button" class="btn btn-secondary btn ml-1" style="margin-top: 0.75rem;width: 100%">취소</button>' +
            '    <button id="' + type + '-button" type="button" class="btn btn-primary btn ml-1" style="margin-top: 0.75rem;width: 100%">' + btnName + '</button>' +

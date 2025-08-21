@@ -7,7 +7,6 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.comment.model.dto.CommentDeleteDto;
@@ -15,7 +14,6 @@ import com.comment.model.dto.CommentListDto;
 import com.comment.model.dto.CommentUpdateDto;
 import com.comment.model.dto.CommentWriteDto;
 import com.comment.service.CommentService;
-import com.comment.service.impl.CommentServiceImpl;
 import com.user.model.dto.UserDto;
 
 import jakarta.servlet.http.HttpSession;
@@ -23,14 +21,8 @@ import jakarta.servlet.http.HttpSession;
 @Controller
 public class CommentController {
 
-    private final CommentServiceImpl commentServiceImpl;
-
 	@Autowired
 	private CommentService commentService;
-
-    CommentController(CommentServiceImpl commentServiceImpl) {
-        this.commentServiceImpl = commentServiceImpl;
-    }
 	
 	// 댓글 작성
 	@PostMapping("/api/comment/write")
@@ -52,6 +44,8 @@ public class CommentController {
 
 		// 게시판 번호
 		int board_id = commentWriteDto.getBoard_id();
+		// 댓글 레벨
+		int parent_level = commentWriteDto.getComment_parent_level();
 		
 		// 댓글 등록
 		boolean result = commentService.commentWrite( commentWriteDto );
@@ -61,6 +55,7 @@ public class CommentController {
 		
 		resultMap.put("commentList", commentList);
 		resultMap.put("result", result);
+		if( parent_level == 0 ) { resultMap.put("level", 0 ); }
 		
 		System.out.println("/api/comment/write 종료");
 		

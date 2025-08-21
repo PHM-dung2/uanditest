@@ -180,38 +180,26 @@
       formData.append("file_state", file_state);
       formData.append("delete_files", fileList);
       
-      $.ajax({
-        type: "post",
-        url: "/api/board/update",
-        data: formData,
-        dataType: "json",
-        processData: false,
-        contentType: false,
-        success: function(res){
-          console.log("res : ", res);
-          
-          if( res == true ){
-            alert("저장되었습니다.");
-            location.href = "/";
-          }else{
-            alert("수정 실패");
-          }
-          
-        },
-        error: function(jqXHR, testStatus, errorThrown){
-          const responseText = JSON.parse(jqXHR.responseText);
-          if( responseText.NullPointerException != null ){
-            alert("에러 발생 : " + responseText.NullPointerException);
-          }
-
-          if( responseText.RuntimeException != null ){
-            alert("에러 발생 : " + responseText.RuntimeException);
-          }
-          console.log("실패", jqXHR);
-        }
-      });
+      // ajax
+      var svcId = "commentUpdate";
+      var type = "POST";
+      var url = "/api/board/update";
+      
+      ajaxFunc( svcId, type, url, formData, callBackFunc );
       
     });
+    
+    // 콜백 함수
+    function callBackFunc( svcId, res ){
+    	
+      if( res == true ){
+        alert("저장되었습니다.");
+        location.href = "/";
+      }else{
+        alert("수정 실패");
+      }
+    	
+    }
 	  
 	  // fileList array 변환
 	  function transferArray( files, formData ){

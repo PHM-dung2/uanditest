@@ -1,9 +1,7 @@
 package com.board.controller;
 
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -159,34 +157,22 @@ public class BoardController{
 	// 게시물 삭제
 	@PostMapping("/api/board/delete")
 	@ResponseBody
-	public Map<String, Object> boardDelete( HttpSession session
+	public boolean boardDelete( HttpSession session
 						                  , int board_id
 						                  ) throws Exception{
 		
 		System.out.println("/api/board/delete 시작");
 		
-		Map<String, Object> resultMap = new HashMap<>();
-		
 		boolean loginState = session.getAttribute("UserDto") != null;
-		if( !loginState ) { 
-			resultMap.put("result", false );
-			resultMap.put("message", "notSession");
-		}else {
-			int result = boardService.boardDelete( board_id );
-			if( result > 0 ) {
-				resultMap.put("message", "deleteSuccess");
-			}else {
-				resultMap.put("message", "deleteFail");
-			}
-			
-			resultMap.put("result", result );
-			
+		if( !loginState ) {
+			throw new RuntimeException("세션 오류 : 로그인 해주세요.");
 		}
+		boolean result = boardService.boardDelete( board_id );
 		
-		System.out.println("resultMap : " + resultMap);
+		System.out.println("result : " + result);
 		System.out.println("/api/board/delete 종료");
 		
-		return resultMap;
+		return result;
 		
 	}
 	

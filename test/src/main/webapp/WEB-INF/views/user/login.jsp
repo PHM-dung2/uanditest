@@ -78,21 +78,24 @@
   
   <script>
   
-    // 로그인 버튼 이벤트
-    $("#login_button").click(function(e) {
-    	e.preventDefault();
-    	
-   	  const email = $("#user_email").val();
-   	  const password = $("#user_password").val();
-   	  
-   	  if( email === '' ){ 
- 	      alert("이메일을 입력해주세요."); return;
- 	    }
-   	  if( password === '' ){ 
-   		  alert("비밀번호를 입력해주세요."); return;
-      };
-    	  
-	 	  // formData 통신
+  // 엔터키
+  $(document).ready(function() {
+	  
+	  // 로그인 버튼 이벤트
+	  $("#login_button").click(function(e) {
+	    e.preventDefault();
+	    
+	    const email = $("#user_email").val();
+	    const password = $("#user_password").val();
+	    
+	    if( email === '' ){ 
+	      alert("이메일을 입력해주세요."); return;
+	    }
+	    if( password === '' ){ 
+	      alert("비밀번호를 입력해주세요."); return;
+	    };
+	      
+	    // formData 통신
 	    const form = $('#login_form')[0];
 	    const formData = new FormData(form);
 	    
@@ -100,10 +103,19 @@
 	    var svcId = "login";
 	    var type = "POST";
 	    var url = "/api/login";
-	  	
-	    ajaxFunc( svcId, type, url, formData, ( svcId, res ) => callBackFunc( svcId, res ) );
 	    
+	    ajaxFunc( svcId, type, url, formData, callBackFunc );
+	  });
+	  
+    $("#login_form input").keypress(function(e){
+      //검색어 입력 후 엔터키 입력하면 조회버튼 클릭
+      if( e.keyCode && e.keyCode == 13 ){
+        $("#login_button").trigger("click");
+        return false;
+      }
     });
+    
+  });
 
     // 콜백 함수
     function callBackFunc( svcId, res ){

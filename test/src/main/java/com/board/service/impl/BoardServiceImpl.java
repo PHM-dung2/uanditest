@@ -55,17 +55,17 @@ public class BoardServiceImpl implements BoardService {
 	@Override
 	public boolean boardWrite(BoardWriteDto boardWriteDto) {
 		
-		int result = boardMapper.boardWrite( boardWriteDto );
+		boolean result = boardMapper.boardWrite( boardWriteDto );
 		
 		// insert 실패시 return
-		if( result == 0 ) { return false; }
+		if( !result ) { return false; }
 		System.out.println("insert success : board_id : " + boardWriteDto.getBoard_id());
 		
 		// 파일 업로드
 		try {
 			List<MultipartFile> files = boardWriteDto.getFiles();
 			
-			if( files == null || files.isEmpty() ) { return false; }
+			if( files == null || files.isEmpty() ) { return result; }
 			int board_id = boardWriteDto.getBoard_id();
 			
 			boolean uploadResult = fileService.multiFileUpload(files, board_id);
@@ -82,17 +82,17 @@ public class BoardServiceImpl implements BoardService {
 	@Override
 	public boolean boardUpdate(BoardUpdateDto boardUpdateDto) {
 		
-		int result = boardMapper.boardUpdate( boardUpdateDto );
+		boolean result = boardMapper.boardUpdate( boardUpdateDto );
 		
 		// update 실패시 return
-		if( result == 0 ) { return false; }
+		if( !result ) { return false; }
 		
 		// 파일 업로드
 		try {
 			List<MultipartFile> files = boardUpdateDto.getFiles();
 			
 			// 변경할 파일 없으면 생략			
-			if( !boardUpdateDto.isFile_state() ) { return true; }
+			if( !boardUpdateDto.isFile_state() ) { return result; }
 			
 			int board_id = boardUpdateDto.getBoard_id();
 			
@@ -119,9 +119,9 @@ public class BoardServiceImpl implements BoardService {
 	}
 	
 	@Override
-	public int boardDelete(int board_id) {
+	public boolean boardDelete(int board_id) {
 		
-		int result = boardMapper.boardDelete( board_id );
+		boolean result = boardMapper.boardDelete( board_id );
 		
 		return result;
 		

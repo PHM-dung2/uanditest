@@ -36,10 +36,17 @@
 			      
     </select>
     
-    <insert id="commentWrite" parameterType="com.comment.model.dto.CommentWriteDto">
+    <insert id="commentWrite" 
+            parameterType="com.comment.model.dto.CommentWriteDto"
+    >
+    
+      <selectKey resultType="int" keyProperty="comment_id" order="BEFORE">
+        SELECT comment_seq.NEXTVAL FROM dual
+      </selectKey>
       
       INSERT INTO comments
-                ( board_id
+                ( comment_id
+                , board_id
                 , user_id
                 , comment_content
                 , comment_root_id
@@ -47,10 +54,16 @@
                 , comment_parent_level
                 )
            VALUES 
-                ( #{ board_id }
+                ( #{ comment_id }
+                , #{ board_id }
                 , #{ user_id }
                 , #{ comment_content }
-                , #{ comment_root_id }
+                ,
+                <!-- 최상위 댓글이면 자기 자신의 ID를 root_id로 -->
+				        <choose>
+			            <when test="comment_parent_level == 0">#{ comment_id }</when>
+			            <otherwise>#{ comment_root_id }</otherwise>
+				        </choose>
                 , #{ comment_parent_id }
                 , #{ comment_parent_level }
                 )

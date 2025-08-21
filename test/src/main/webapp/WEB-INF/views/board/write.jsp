@@ -106,6 +106,8 @@
     	const content = $("#board_content");
     	const upfile = $("#upfile");
     	
+    	if( !confirm("작성을 하시겠습니까?") ){ return false; }
+    	
     	if( title.val() === "" ){ 
    		  alert("제목을 입력해주세요.");
    		  title.focus();
@@ -116,8 +118,6 @@
     	  content.focus();
     	  return false;
     	}
-   	  
-    	if( !confirm("작성을 하시겠습니까?") ){ return false; }
     	
     	const form = $("#writeForm")[0];
     	let formData = new FormData(form);
@@ -125,36 +125,12 @@
     	// Array로 변환
     	formData = transferArray( upfile, formData );
     	
-    	$.ajax({
-   		  type: "post",
-   		  url: "/api/board/write",
-   		  data: formData,
-   		  dataType: "json",
-   		  processData: false,
-   		  contentType: false,
-   		  success: function(res){
-   			  console.log("res : ", res);
-   			  
-   			  if( res == true ){
-   				  alert("저장되었습니다.");
-   				  location.href = "/";
-   			  }else{
-   				  alert("저장 실패");
-   			  }
-   			  
-   		  },
-   		  error: function(jqXHR, testStatus, errorThrown){
-   			  const responseText = JSON.parse(jqXHR.responseText);
-   			  if( responseText.NullPointerException != null ){
-   				  alert("에러 발생 : " + responseText.NullPointerException);
-   			  }
-
-   			  if( responseText.RuntimeException != null ){
-   				  alert("에러 발생 : " + responseText.RuntimeException);
-   			  }
-          console.log("실패", jqXHR);
-   		  }
-    	});
+    	// ajax
+      var svcId = "boardWrite";
+      var type = "POST";
+      var url = "/api/board/write";
+      
+      ajaxFunc( svcId, type, url, formData, callBackFunc );
     	
     });
 
@@ -171,6 +147,15 @@
         fileBox.append("<div class='mr-2'>" + file.name + "</div>");
       });
     });
+    
+    function callBackFunc( svcId, res ){
+    	if( res == true ){
+        alert("저장되었습니다.");
+        location.href = "/";
+      }else{
+        alert("저장 실패");
+      }
+    }
 
     
     // 이미지 첨부

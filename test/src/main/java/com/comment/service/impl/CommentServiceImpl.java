@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.comment.model.dto.CommentListDto;
 import com.comment.model.dto.CommentUpdateDto;
 import com.comment.model.dto.CommentWriteDto;
@@ -11,6 +13,7 @@ import com.comment.model.mapper.CommentMapper;
 import com.comment.service.CommentService;
 
 @Service
+@Transactional
 public class CommentServiceImpl implements CommentService {
 
 	@Autowired
@@ -28,6 +31,10 @@ public class CommentServiceImpl implements CommentService {
 	public boolean commentWrite(CommentWriteDto commentWriteDto) {
 		
 		boolean result = commentMapper.commentWrite( commentWriteDto );
+		
+		if( !result ) {
+			throw new RuntimeException("댓글 등록 실패 : insert error");
+		}
 		
 		return result;
 	}

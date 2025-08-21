@@ -46,6 +46,6 @@ public interface BoardService {
 	 * @author 박희만
 	 * @since 2025-08-04
 	 */
-	public int boardDelete(int board_id);
+	public boolean boardDelete(int board_id);
 	
 }
