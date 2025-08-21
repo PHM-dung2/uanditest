@@ -16,6 +16,7 @@ public class LoginCheckInterceptor implements HandlerInterceptor{
 		HttpSession session = request.getSession( false );
 		if( session == null || session.getAttribute("UserDto") == null ) {
 			return false;
+			
 		}
 		return true;
 	}
