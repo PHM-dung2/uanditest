@@ -6,6 +6,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -27,7 +28,8 @@ public class SecurityConfig {
 		"/scss/**",
 		"/vendor/**",
 		/* api */
-		"/api/**",
+		"/api/login",
+		"/api/createUser",
 		/* 게시판 */
         "/",
         "/board/detail",
@@ -48,7 +50,12 @@ public class SecurityConfig {
 							DispatcherType.ASYNC
 					).permitAll()
 					.requestMatchers(PERMIT_URL_ARRAY).permitAll()
+					.requestMatchers("/api/**").authenticated()
 					.anyRequest().authenticated()
+			)
+			.sessionManagement( session -> session
+				.sessionCreationPolicy( SessionCreationPolicy.IF_REQUIRED )
+				.invalidSessionUrl("/login") // 세션 만료시 로그인페이지로
 			)
 			.formLogin( formLogin -> formLogin
 									 .loginPage("/login")

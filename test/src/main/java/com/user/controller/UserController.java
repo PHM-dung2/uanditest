@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import com.user.model.dto.UserDto;
 import com.user.model.dto.UserLoginDto;
-import com.user.service.LoginService;
 import com.user.service.UserService;
 
 import jakarta.servlet.http.HttpSession;
@@ -24,9 +23,6 @@ public class UserController {
 	
 	@Autowired
 	private UserService userService;
-	
-	@Autowired
-	private LoginService loginService;
 	
 	@Autowired
 	private AuthenticationManager authenticationManager;
@@ -136,7 +132,7 @@ public class UserController {
 		
 		if( result != null ) { 
 			session.setAttribute("UserDto", result );
-			session.setMaxInactiveInterval(60*5);
+			session.setMaxInactiveInterval(60*1);
 			
 			System.out.println( "세션 : " + (UserDto)session.getAttribute("UserDto") );
 		}else {
@@ -149,7 +145,7 @@ public class UserController {
 	}
 	
 	// 세션의 회원정보 가져오기
-	@GetMapping("/imformation")
+	@GetMapping("/api/imformation")
 	@ResponseBody
 	public UserDto getSessionUser(HttpSession session) {
 		

@@ -94,7 +94,6 @@ public class BoardController{
 		
 		System.out.println("api/board/write 시작");
 		UserDto userDto = (UserDto)session.getAttribute("UserDto");
-		if( userDto == null ) { throw new NullPointerException("로그인해 주세요."); }
 		
 		int userId = userDto.getUser_id();
 		boardWriteDto.setUser_id( userId );

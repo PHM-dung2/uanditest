@@ -44,6 +44,14 @@ function ajaxFunc( svcId, type, url, inData, callback, async ){
       
       const responseText = JSON.parse( jqXHR.responseText );
       
+      // 로그인이 안된 상태거나 session 없을 때
+      if ( jqXHR.status === 401 ) {
+        const response = JSON.parse( jqXHR.responseText );
+        alert( response.message ); // "로그인이 필요합니다."
+        window.location.href = '/login';
+        return;
+      }
+      
       if( responseText.RuntimeException != null ){
         alert("에러 발생 : " + responseText.RuntimeException);
       }
